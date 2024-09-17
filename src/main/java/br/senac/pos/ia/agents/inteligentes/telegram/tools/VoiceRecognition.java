@@ -1,5 +1,7 @@
 package br.senac.pos.ia.agents.inteligentes.telegram.tools;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import br.senac.pos.ia.agents.inteligentes.telegram.contracts.GroqResponse;
 
 @Component
 public class VoiceRecognition {
@@ -50,8 +54,9 @@ public class VoiceRecognition {
         multipartBody.add("language", "pt");
 
         final HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(multipartBody, headers);
-        final ResponseEntity<String> responseEntity = restTemplate.exchange(GROQ_API_URL, HttpMethod.POST, requestEntity, String.class);
-
-        return responseEntity.getBody();
+        final ResponseEntity<GroqResponse> groqResponseEntity = restTemplate.exchange(GROQ_API_URL, HttpMethod.POST, requestEntity, GroqResponse.class);
+        final GroqResponse groqResponse = groqResponseEntity.getBody();
+        
+        return Optional.ofNullable(groqResponse != null ? groqResponse.getText() : null).orElseThrow();
     }
 }
