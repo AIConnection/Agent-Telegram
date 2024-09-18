@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.inteligentes.telegram.contracts;
+package br.senac.pos.ia.agents.adapters.secundary.recognition;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroqResponse {
+class GroqResponse {
 	
     private String text;
     private XGroq xGroq;

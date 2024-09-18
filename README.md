@@ -1,124 +1,125 @@
-# **Agente Conversacional com Reconhecimento de Voz e Integração com LLM**
+# **Documento de Projeto: Agente Virtual Inteligente com Reconhecimento de Voz e Integração com LLM**
 
-## **Visão Geral**
+## **1. Introdução**
 
-Este projeto consiste em um agente conversacional desenvolvido em **Spring Boot** e integrado ao **Telegram**, com suporte para mensagens de texto e voz. O agente é capaz de:
-1. Receber mensagens de texto e voz de um usuário no Telegram.
-2. Converter mensagens de voz no formato OGG para MP3.
-3. Utilizar um serviço de **Reconhecimento de Voz** para converter a mensagem de áudio em texto.
-4. Enviar o texto para um **modelo de linguagem natural** (*Large Language Model* ou LLM) utilizando **Spring.AI**.
-5. Retornar uma resposta gerada pela LLM ao usuário no Telegram.
+Este documento apresenta, de forma didática, todos os aspectos do desenvolvimento de um agente virtual inteligente que interage com usuários via **Telegram**, utilizando **Spring Boot**, **Spring.AI**, e a biblioteca **telegrambots-abilities**. O agente processa tanto mensagens de texto quanto de voz, utilizando a API da **Groq** para reconhecimento de fala e um **Large Language Model (LLM)** para gerar respostas contextuais.
 
-Este projeto explora conceitos de **Processamento de Linguagem Natural (PLN)**, **Reconhecimento de Fala** e **Inteligência Artificial Conversacional**, oferecendo uma solução prática e acadêmica que pode ser utilizada em diversos cenários de interação com o usuário.
+O projeto explora a aplicação de conceitos de **Inteligência Artificial (IA)**, **Processamento de Linguagem Natural (PLN)**, **Reconhecimento de Fala**, e **Engenharia de Software**, aplicados em um sistema de agentes inteligentes.
 
 ---
 
-## **Tecnologias Utilizadas**
-1. **Spring Boot**: Framework utilizado para a construção da aplicação Java.
-2. **Telegram Bots API**: Interface usada para conectar e interagir com os usuários no Telegram.
-3. **Spring.AI**: Integração com modelos de linguagem natural, como os fornecidos pela OpenAI, para gerar respostas baseadas em texto.
-4. **JAVE**: Biblioteca para converter arquivos de áudio do formato OGG para MP3.
-5. **Reconhecimento de Fala**: Uso da API da **Groq** para realizar a conversão de áudio em texto.
+## **2. Requisitos do Projeto**
+
+### **2.1. Funcionais**
+- O sistema deve receber e processar mensagens de texto enviadas pelos usuários no Telegram.
+- O sistema deve receber mensagens de voz, convertê-las em texto e processar a transcrição.
+- O sistema deve integrar-se com uma **LLM** (Large Language Model) para gerar respostas inteligentes baseadas nas mensagens dos usuários.
+- O sistema deve retornar a resposta gerada pela **LLM** ao usuário no Telegram, tanto para mensagens de texto quanto de voz.
+
+### **2.2. Não Funcionais**
+- O sistema deve ser modular e escalável, permitindo fácil adição de novos componentes.
+- O tempo de resposta para as interações deve ser o menor possível, considerando a integração com serviços externos.
+- A arquitetura deve facilitar a substituição de serviços externos, como a API de reconhecimento de voz, sem grandes modificações.
+- O sistema deve ser facilmente testável, com suporte para testes unitários e de integração.
 
 ---
 
-## **Arquitetura da Solução**
+## **3. Arquitetura do Sistema**
 
-A solução segue uma arquitetura modular que facilita a integração de diferentes serviços e a manutenção do código:
+### **3.1. Arquitetura Geral**
 
-### **1. Interação com o Telegram**
-O agente é construído utilizando a biblioteca **telegrambots-abilities**, que permite organizar e gerenciar habilidades (abilities) de forma modular. A classe principal `PlnAgent` herda de `AbilityBot` e define as interações básicas com o usuário, como:
-- Iniciar o bot com o comando `/start`.
-- Responder a mensagens de voz.
-- Responder a mensagens de texto.
+A arquitetura do sistema é composta por três componentes principais:
 
-A partir dessa interação, o agente obtém as mensagens de voz ou texto enviadas pelo usuário e processa essas entradas.
+1. **Cliente (Telegram)**: O Telegram serve como interface de comunicação com os usuários, onde eles enviam mensagens de texto ou voz, e recebem respostas do bot.
 
-### **2. Processamento de Mensagens de Voz**
-Quando o usuário envia uma mensagem de voz, o bot segue os seguintes passos:
-1. O arquivo de áudio, no formato OGG, é baixado do Telegram.
-2. O áudio é convertido de OGG para MP3 utilizando a biblioteca **JAVE**.
-3. O arquivo MP3 é enviado para a API de **Reconhecimento de Fala** (Groq), que converte o áudio em texto.
+2. **Servidor Backend (Spring Boot)**: O servidor backend, desenvolvido com **Spring Boot**, processa as mensagens dos usuários e utiliza diversos módulos para realizar diferentes funções, como conversão de áudio, reconhecimento de fala e processamento de linguagem natural.
 
-### **3. Integração com LLM (Processamento de Linguagem Natural)**
-Após a conversão da voz para texto, o texto gerado é enviado para um **modelo de linguagem natural** via **Spring.AI**. Esse modelo é responsável por analisar a mensagem e gerar uma resposta baseada em algoritmos avançados de **Machine Learning** e **Inteligência Artificial**.
+3. **Serviços Externos**: O sistema se integra a serviços externos, como a API da **Groq** para reconhecimento de fala e o **Spring.AI** para gerar respostas a partir de modelos LLM.
 
-Os **LLMs** são modelos treinados em grandes volumes de dados e capazes de entender e gerar respostas coerentes em linguagem natural. No projeto, usamos um modelo baseado na API OpenAI para gerar respostas aos usuários.
+### **3.2. Componentes da Arquitetura**
 
-### **4. Resposta ao Usuário**
-Finalmente, a resposta gerada pelo modelo LLM é enviada de volta ao usuário no Telegram como uma mensagem de texto.
+- **PlnAgent**: Componente principal que gerencia as interações com o Telegram, utilizando a biblioteca **telegrambots-abilities**. Ele define as habilidades do bot, como receber comandos de texto e processar mensagens de voz.
+
+- **VoiceRecognitionService**: Serviço que integra-se à **API Groq** para transcrição de voz, convertendo áudios MP3 em texto.
+
+- **AudioConversionService**: Responsável por converter os arquivos de áudio de OGG (formato padrão do Telegram) para MP3, permitindo que o áudio seja processado pelo serviço de reconhecimento de fala.
+
+- **Spring.AI Integration**: Módulo que realiza a comunicação com a **LLM**, gerando respostas inteligentes baseadas no texto transcrito ou nas mensagens de texto dos usuários.
 
 ---
 
-## **Fluxo de Execução**
-1. **Início**: O usuário interage com o bot enviando uma mensagem de texto ou voz.
-2. **Processamento de Texto**: Se for uma mensagem de texto, o bot envia o texto diretamente para a LLM.
-3. **Processamento de Voz**:
-   - O bot baixa o arquivo de voz.
-   - O arquivo OGG é convertido para MP3.
-   - O MP3 é enviado para a API de reconhecimento de fala, que converte o áudio em texto.
-   - O texto resultante é enviado para a LLM para processamento.
-4. **Resposta**: A resposta da LLM é enviada ao usuário como uma mensagem de texto no Telegram.
+## **4. Conceitos Aplicados**
+
+### **4.1. Inteligência Artificial e Processamento de Linguagem Natural (PLN)**
+
+O sistema aplica **Inteligência Artificial** por meio do **Processamento de Linguagem Natural (PLN)**, utilizando um **Large Language Model (LLM)**. Esses modelos, como o GPT, são treinados em grandes quantidades de dados e são capazes de entender e gerar linguagem natural de forma sofisticada. Neste projeto, o LLM é utilizado para interpretar as mensagens dos usuários e gerar respostas inteligentes.
+
+### **4.2. Reconhecimento de Fala**
+
+O **Reconhecimento de Fala** converte áudio em texto, permitindo que o bot processe mensagens de voz enviadas pelos usuários. Para essa funcionalidade, o projeto utiliza a **API Groq**, que transcreve arquivos de áudio em MP3 para texto.
+
+### **4.3. Conversão de Áudio (OGG para MP3)**
+
+Os arquivos de áudio enviados pelo Telegram estão no formato OGG, que não é suportado diretamente por todos os serviços de reconhecimento de fala. Portanto, o áudio é convertido para MP3 usando o **JAVE** (Java Audio Video Encoder), permitindo que o arquivo seja processado pela API de transcrição.
 
 ---
 
-## **Conceitos**
+## **5. Frameworks Utilizados**
 
-### **1. Processamento de Linguagem Natural (PLN)**
-O **PLN** refere-se à aplicação de algoritmos de Inteligência Artificial para entender e gerar linguagem humana. No contexto deste projeto, utilizamos um modelo LLM para interpretar as mensagens enviadas pelos usuários e gerar respostas adequadas. Modelos LLM, como os fornecidos pela OpenAI, são treinados em grandes volumes de dados textuais e são capazes de gerar respostas com base em contextos complexos.
+### **5.1. Spring Boot**
+O **Spring Boot** é o framework principal para o desenvolvimento da aplicação backend. Ele facilita a criação de APIs e sistemas web robustos e escaláveis, com suporte para integração de múltiplos serviços e bibliotecas.
 
-#### **Relevância**:
-O PLN é uma área fundamental da IA, usada em tarefas como **análise de sentimentos**, **extração de entidades**, **tradução automática** e **respostas automáticas**. Este projeto aplica o PLN ao contexto de assistentes virtuais.
+### **5.2. Spring.AI**
+**Spring.AI** é utilizado para integrar o sistema com **Large Language Models (LLMs)**, permitindo que o bot processe entradas de linguagem natural e gere respostas contextuais de forma eficiente.
 
-### **2. Reconhecimento de Fala**
-O **Reconhecimento de Fala** é a tecnologia que permite converter fala em texto. No projeto, utilizamos um serviço de reconhecimento de fala (API Groq) para transcrever áudios enviados pelos usuários para texto, que é posteriormente processado por um LLM.
+### **5.3. Telegram Bots API e telegrambots-abilities**
+A biblioteca **telegrambots-abilities** simplifica o desenvolvimento de bots no Telegram. Ela permite definir habilidades (abilities) de forma modular, como responder a comandos de texto ou processar mensagens de voz, abstraindo grande parte da complexidade da API do Telegram.
 
-#### **Relevância**:
-O reconhecimento de fala é uma área essencial da interação humano-computador e é utilizado em muitos contextos, como assistentes virtuais (Siri, Alexa), transcrição de áudios e sistemas de ditado. Ele envolve técnicas avançadas de **Machine Learning** e **Redes Neurais**, treinadas para identificar padrões de fala e mapeá-los para texto.
-
-### **3. Conversão de Áudio (OGG para MP3)**
-Os arquivos de áudio enviados pelo Telegram estão no formato OGG, que não é diretamente compatível com a maioria dos serviços de reconhecimento de voz. Portanto, é necessário realizar a conversão para MP3 antes de enviá-los ao serviço de transcrição. A conversão é realizada utilizando a biblioteca **JAVE**, que facilita o processo de transformação entre diferentes formatos de mídia.
-
-#### **Relevância**:
-A manipulação de arquivos de áudio e vídeo é fundamental em diversas áreas da computação, como multimídia, compressão de dados e transmissão de conteúdo. A conversão de formatos é uma operação comum em sistemas que processam áudio e vídeo de várias fontes.
+### **5.4. JAVE**
+O **JAVE** é utilizado para converter os arquivos de áudio OGG, que são o padrão do Telegram, para o formato MP3. Isso é necessário para que o áudio seja enviado para o serviço de transcrição de voz da API da Groq.
 
 ---
 
-## **Como Executar**
+## **6. Serviços Utilizados**
 
-### **Pré-requisitos**
-- **Java 11+** instalado
-- **Maven** instalado
-- **Token do Telegram Bot** (disponível via BotFather)
-- **Chave de API** para o serviço de reconhecimento de voz (Groq)
+### **6.1. API Groq**
+A **API Groq** é usada para realizar o reconhecimento de fala, convertendo áudios MP3 em texto. Esse texto é utilizado como entrada para o modelo de linguagem natural, que gera uma resposta inteligente.
 
-### **Passos para Execução**
-1. Clone este repositório:
-   ```bash
-   git clone https://github.com/seu-repositorio
-   cd seu-repositorio
+#### **Como Configurar a API Groq**
+1. Acesse [Groq Console](https://console.groq.com) e crie uma conta.
+2. Gere uma chave de API em **API Keys**.
+3. Configure a chave de API no arquivo `application.properties`:
+   ```properties
+   spring.ai.openai.api-key=<YOUR_GROQ_API_KEY>
    ```
 
-2. Compile o projeto com Maven:
-   ```bash
-   mvn clean install
-   ```
-
-3. Execute a aplicação:
-   ```bash
-   mvn spring-boot:run
-   ```
-
-4. Envie uma mensagem de voz ou texto para o bot no Telegram e veja o agente em ação!
+### **6.2. OpenAI GPT via Spring.AI**
+O **Spring.AI** integra o bot com um **Large Language Model (LLM)**, permitindo que ele gere respostas inteligentes com base no contexto da interação. Esse serviço é configurado para processar tanto mensagens de texto quanto de voz transcrita.
 
 ---
 
-## **Desafios Adicionais**
-- Adicione suporte para reconhecimento de múltiplos idiomas.
-- Melhore a análise de sentimentos nas respostas do bot.
-- Implemente uma interface de administração para monitorar as interações do bot.
+## **7. Engenharia de Software Aplicada**
 
----
+### **7.1. Princípios SOLID**
+Os princípios **SOLID** foram aplicados durante o desenvolvimento do sistema, garantindo uma arquitetura modular e de fácil manutenção:
 
-## **Licença**
-Este projeto é licenciado sob os termos da [MIT License](LICENSE).
+- **S - Single Responsibility Principle**: Cada módulo tem uma única responsabilidade. Por exemplo, o `VoiceRecognitionService` lida apenas com a transcrição de voz, enquanto o `PlnAgent` é responsável por interagir com o Telegram.
+  
+- **O - Open/Closed Principle**: O sistema está aberto para extensão, permitindo adicionar novas funcionalidades sem modificar o código existente. Isso foi possível por meio da injeção de dependências e de interfaces claras.
+
+- **L - Liskov Substitution Principle**: O sistema foi desenvolvido de forma que componentes possam ser substituídos sem comprometer seu comportamento, permitindo a substituição de serviços de terceiros, como a API de reconhecimento de voz.
+
+- **I - Interface Segregation Principle**: As interfaces foram projetadas de forma que os módulos utilizam apenas os métodos que precisam, promovendo a separação de responsabilidades.
+
+- **D - Dependency Inversion Principle**: O projeto utiliza **injeção de dependência**, o que facilita a substituição de implementações concretas e a realização de testes unitários.
+
+### **7.2. Arquitetura em Camadas**
+A aplicação segue uma **arquitetura em camadas**, separando a lógica de negócios da camada de comunicação com APIs e da camada de infraestrutura. Essa abordagem permite uma fácil manutenção e facilita a escalabilidade do sistema.
+
+### **7.3. Modularidade e Testabilidade**
+O projeto foi estruturado para garantir a modularidade, onde cada funcionalidade (como reconhecimento de fala ou integração com a LLM) é encapsulada em seu próprio módulo. Isso facilita a implementação de testes unitários e a manutenção do sistema.
+
+### **7.4. Escalabilidade**
+Graças à sua modularidade e ao uso de boas práticas de engenharia de software, o sistema pode ser facilmente escalado para incluir novas funcionalidades, como a integração com outros serviços de PLN ou suporte para múltiplos idiomas.
+
+### **

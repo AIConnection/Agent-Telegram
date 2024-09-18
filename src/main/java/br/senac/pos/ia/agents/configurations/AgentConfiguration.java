@@ -1,4 +1,6 @@
-package br.senac.pos.ia.agents.inteligentes.telegram.configurations;
+package br.senac.pos.ia.agents.configurations;
+
+import java.nio.file.FileSystem;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,12 +11,14 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import com.google.common.jimfs.Jimfs;
+
 @Configuration
-public class TelegramAgentConfiguration {
+public class AgentConfiguration {
 
 	private final AbilityBot plnAgent;
 	
-	public TelegramAgentConfiguration(@Autowired @Qualifier("plnAgent") final AbilityBot plnAgent) {
+	public AgentConfiguration(@Autowired @Qualifier("plnAgent") final AbilityBot plnAgent) {
 		this.plnAgent = plnAgent;
 	}
 	
@@ -25,5 +29,10 @@ public class TelegramAgentConfiguration {
          botsApi.registerBot(plnAgent);
          
          return botsApi;
+	}
+	
+	@Bean
+	public FileSystem inMemoryFileSystem() {
+		return Jimfs.newFileSystem(com.google.common.jimfs.Configuration.unix());
 	}
 }

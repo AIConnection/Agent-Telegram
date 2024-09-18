@@ -1,13 +1,13 @@
-package br.senac.pos.ia.agents.inteligentes.telegram;
+package br.senac.pos.ia.agents;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AgentTelegramApplication {
+public class AgentApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AgentTelegramApplication.class, args);
+		SpringApplication.run(AgentApplication.class, args);
 	}
 
 }

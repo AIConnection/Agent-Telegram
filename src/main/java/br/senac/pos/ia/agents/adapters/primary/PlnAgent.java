@@ -1,10 +1,9 @@
-package br.senac.pos.ia.agents.inteligentes.telegram.agents;
+package br.senac.pos.ia.agents.adapters.primary;
 
 import java.net.URL;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 
-import br.senac.pos.ia.agents.inteligentes.telegram.tools.AudioConversion;
-import br.senac.pos.ia.agents.inteligentes.telegram.tools.VoiceRecognition;
+import br.senac.pos.ia.agents.service.AgentService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,23 +30,14 @@ public class PlnAgent extends AbilityBot {
 	
 	private final String botToken;
 	
-	private final OpenAiChatModel chatModel;
+	private final AgentService agentService;
 	
-	private final VoiceRecognition voiceRecognitionService;
-	
-	private final AudioConversion audioConversion;
-	
-	public PlnAgent(
-			@Value("${botToken}") final String botToken,
-			@Autowired final OpenAiChatModel chatModel,
-			@Autowired final VoiceRecognition voiceRecognitionService,
-			@Autowired final AudioConversion audioConversion) {
+	public PlnAgent(@Value("${botToken}") final String botToken, @Autowired final AgentService agentService) {
 		
 		super(botToken, "PlnAgent");
+		
 		this.botToken = botToken;
-		this.chatModel = chatModel;
-		this.voiceRecognitionService = voiceRecognitionService;
-		this.audioConversion = audioConversion;
+		this.agentService = agentService;
 	}
 	
 	public Ability startBot() {
@@ -71,8 +60,8 @@ public class PlnAgent extends AbilityBot {
 	        .locality(Locality.ALL)
 	        .privacy(Privacy.PUBLIC)
 	        .action(ctx -> {
-	            final String userMessage = ctx.update().getMessage().getText();
-	            final String response = chatModel.call(userMessage);
+	            final String text = ctx.update().getMessage().getText();
+	            final String response = agentService.complete(text);
 	            responseMessage(ctx.update().getMessage().getChatId(), response);
 	        })
 	        .build();
@@ -117,40 +106,26 @@ public class PlnAgent extends AbilityBot {
 			}
 		};
 	}
+
+	@SneakyThrows
+	private void responseMessage(final Long chatId, final String text) {
+		
+		final SendMessage sendMessage = new SendMessage(String.valueOf(chatId), text);
+	    sender.execute(sendMessage); 
+	}
+	
+	private boolean voiceExist(final Update update) {
+		
+		return update != null && update.getMessage() != null && update.getMessage().getVoice() != null;
+	}
 	
 	@SneakyThrows
 	private String voiceToText(final Update update) {
 		
-		try {
-			final Voice voice = update.getMessage().getVoice();
-			final File file = sender.execute(new GetFile(voice.getFileId()));
-			final String fileUrl = file.getFileUrl(botToken);
-			
-			//https://www.ffmpeg.org/download.html
-			final byte[] mp3 = audioConversion.convertOggToMp3(new URL(fileUrl));
-			
-			log.info("m=voiceToText, mp3.length: {} bytes", mp3.length);
-			
-			final String text = voiceRecognitionService.convertVoiceToText(mp3);
-			
-			log.info("m=voiceToText, text: {}", text);
-			
-			return chatModel.call(text);
-		}catch (Exception e) {
-			
-			log.error("m=voiceToText", e);
-			
-			throw new RuntimeException(e);
-		}
-	}
-
-	@SneakyThrows
-	private void responseMessage(final Long chatId, final String text) {
-	    sender.execute(new SendMessage(String.valueOf(chatId), text));        
-	}
-	
-	private boolean voiceExist(Update update) {
+		final Voice voice = update.getMessage().getVoice();
+		final File file = sender.execute(new GetFile(voice.getFileId()));
+		final String fileUrl = file.getFileUrl(botToken);
 		
-		return update != null && update.getMessage() != null && update.getMessage().getVoice() != null;
+		return agentService.processVoice(new URL(fileUrl));
 	}
 }

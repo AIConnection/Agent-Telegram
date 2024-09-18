@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.inteligentes.telegram.tools;
+package br.senac.pos.ia.agents.adapters.secundary.recognition;
 
 import java.util.Optional;
 
@@ -14,10 +14,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import br.senac.pos.ia.agents.inteligentes.telegram.contracts.GroqResponse;
+import br.senac.pos.ia.agents.service.Recognition;
 
 @Component
-public class VoiceRecognition {
+public class VoiceRecognition implements Recognition {
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
     
@@ -29,7 +29,8 @@ public class VoiceRecognition {
     	this.groqApiToken = groqApiToken;
     }
 
-    public String convertVoiceToText(final byte[] voiceData) {
+    @Override
+	public String convertVoiceToText(final byte[] voiceData) {
     	
     	final ByteArrayResource resource = new ByteArrayResource(voiceData) {
     		

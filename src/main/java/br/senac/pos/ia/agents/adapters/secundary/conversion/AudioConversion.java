@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.inteligentes.telegram.tools;
+package br.senac.pos.ia.agents.adapters.secundary.conversion;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import org.springframework.stereotype.Component;
 
+import br.senac.pos.ia.agents.service.Conversion;
 import lombok.SneakyThrows;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.MultimediaObject;
@@ -13,10 +14,11 @@ import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 
 @Component
-public class AudioConversion {
+public class AudioConversion implements Conversion {
 
+	@Override
 	@SneakyThrows
-    public byte[] convertOggToMp3(final URL sourceOggFile) {
+    public byte[] convert(final URL sourceFile) {
 	
         // Define audio attributes for MP3 conversion
 		final AudioAttributes audio = new AudioAttributes();
@@ -33,7 +35,7 @@ public class AudioConversion {
         // Perform the conversion from OGG to MP3
         final Path targetMp3File = Files.createTempFile("agent-", "-ai");
         final Encoder encoder = new Encoder();
-        encoder.encode(new MultimediaObject(sourceOggFile), targetMp3File.toFile(), attrs);
+        encoder.encode(new MultimediaObject(sourceFile), targetMp3File.toFile(), attrs);
 
         return Files.readAllBytes(targetMp3File);
     }
