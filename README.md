@@ -92,7 +92,7 @@ A **API da Groq** é responsável pela transcrição de voz no projeto, converte
 2. Gere uma chave de API na seção **API Keys**.
 3. Configure a chave no arquivo `application.properties` ou no sistema de gerenciamento de configurações:
    ```properties
-   groq.api-key=YOUR_GROQ_API_KEY
+   spring.ai.openai.api-key=YOUR_GROQ_API_KEY
    ```
 
 ### **6.2. OpenAI GPT via Spring AI**
