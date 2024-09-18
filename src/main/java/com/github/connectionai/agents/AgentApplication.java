@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents;
+package com.github.connectionai.agents;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.configurations;
+package com.github.connectionai.agents.configurations;
 
 import java.nio.file.FileSystem;
 

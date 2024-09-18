@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.service;
+package com.github.connectionai.agents.service;
 
 public interface LLMInference {
 	

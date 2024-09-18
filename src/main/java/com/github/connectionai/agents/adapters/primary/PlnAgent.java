@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.primary;
+package com.github.connectionai.agents.adapters.primary;
 
 import java.net.URL;
 import java.util.function.BiConsumer;
@@ -20,7 +20,8 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 
-import br.senac.pos.ia.agents.service.AgentService;
+import com.github.connectionai.agents.service.AgentService;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 

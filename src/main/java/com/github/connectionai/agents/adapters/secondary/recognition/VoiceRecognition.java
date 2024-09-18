@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.secondary.recognition;
+package com.github.connectionai.agents.adapters.secondary.recognition;
 
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import br.senac.pos.ia.agents.service.Recognition;
+import com.github.connectionai.agents.service.Recognition;
 
 @Component
 public class VoiceRecognition implements Recognition {

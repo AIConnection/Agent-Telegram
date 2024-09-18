@@ -1,10 +1,10 @@
-package br.senac.pos.ia.agents.adapters.secondary.inference;
+package com.github.connectionai.agents.adapters.secondary.inference;
 
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import br.senac.pos.ia.agents.service.LLMInference;
+import com.github.connectionai.agents.service.LLMInference;
 
 @Component
 public class TextLLMInference implements LLMInference {

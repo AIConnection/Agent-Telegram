@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.secondary.conversion;
+package com.github.connectionai.agents.adapters.secondary.conversion;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -6,7 +6,8 @@ import java.nio.file.Path;
 
 import org.springframework.stereotype.Component;
 
-import br.senac.pos.ia.agents.service.Conversion;
+import com.github.connectionai.agents.service.Conversion;
+
 import lombok.SneakyThrows;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.MultimediaObject;
