@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.secundary.conversion;
+package br.senac.pos.ia.agents.adapters.secondary.conversion;
 
 import java.net.URL;
 import java.nio.file.Files;

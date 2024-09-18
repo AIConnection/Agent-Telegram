@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.secundary.inference;
+package br.senac.pos.ia.agents.adapters.secondary.inference;
 
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;

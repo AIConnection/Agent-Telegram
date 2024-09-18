@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.adapters.secundary.recognition;
+package br.senac.pos.ia.agents.adapters.secondary.recognition;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
