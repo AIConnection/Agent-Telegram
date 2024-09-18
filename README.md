@@ -62,7 +62,7 @@ Mensagens de voz enviadas pelo Telegram estão no formato OGG, incompatível com
 
 ### **4.4. Gerenciamento de Arquivos Temporários**
 
-Para manipular os arquivos de áudio durante a conversão e transcrição, o sistema utiliza fluxos de dados em memória ou armazena os arquivos temporariamente no sistema de arquivos. O gerenciamento eficiente desses arquivos temporários é crucial para a performance e a segurança do sistema.
+Para manipular os arquivos de áudio durante a conversão e transcrição, o sistema utiliza práticas eficientes de gerenciamento de arquivos temporários, garantindo que os recursos sejam liberados após o uso. Isso inclui a utilização de fluxos de dados em memória quando possível e a limpeza automática de arquivos temporários, melhorando a eficiência e a segurança da aplicação.
 
 ---
 
@@ -98,6 +98,65 @@ A **API da Groq** é responsável pela transcrição de voz no projeto, converte
 ### **6.2. OpenAI GPT via Spring AI**
 O **Spring AI** integra o sistema com um **LLM**, permitindo que o bot interprete e responda a mensagens com base em linguagem natural. O **LLM** é configurado para processar mensagens de texto ou voz (convertidas em texto).
 
+### **6.3. Configuração do Bot do Telegram**
+
+Para que o agente virtual possa interagir com os usuários via Telegram, é necessário criar um bot, obter as chaves de acesso (tokens) e utilizar o SDK do Telegram. A seguir, são detalhados os passos necessários.
+
+#### **6.3.1. Criação do Bot no Telegram**
+
+1. **Iniciar Conversa com o BotFather**:
+   - No aplicativo do Telegram, pesquise por **@BotFather** e inicie uma conversa.
+2. **Criar um Novo Bot**:
+   - Envie o comando `/newbot` ao BotFather.
+   - Siga as instruções fornecendo um nome para o seu bot (por exemplo, "Agente Virtual Inteligente").
+   - Escolha um nome de usuário para o bot que termine com `bot` (por exemplo, "AgenteVirtualBot").
+3. **Obter o Token de Acesso**:
+   - Após a criação, o BotFather fornecerá um token de API no formato:
+     ```
+     123456789:ABCdefGHIjklMNO_pqrSTUvwxYZ
+     ```
+   - Guarde este token com segurança; ele será usado para configurar o acesso do seu aplicativo ao bot.
+
+#### **6.3.2. Configuração do Token no Aplicativo**
+
+- No arquivo `application.properties` ou no sistema de gerenciamento de configurações, adicione o token do bot:
+  ```properties
+  botToken=<YOUR_TELEGRAM_API_KEY>
+  ```
+
+#### **6.3.3. Utilização do SDK do Telegram**
+
+- **Dependência Maven**:
+  - Certifique-se de adicionar a dependência do **telegrambots-abilities** no seu `pom.xml`:
+    ```xml
+    <dependency>
+        <groupId>org.telegram</groupId>
+        <artifactId>telegrambots-abilities</artifactId>
+        <version>5.5.0</version>
+    </dependency>
+    ```
+
+- **Implementação do Bot**:
+  - Crie uma classe que estenda `AbilityBot` fornecida pela biblioteca `telegrambots-abilities`.
+  - Implemente os métodos necessários, como `onUpdateReceived`, para processar as mensagens recebidas.
+
+- **Registro do Bot**:
+  - No seu aplicativo Spring Boot, registre o bot como um bean para que ele seja inicializado corretamente:
+    ```java
+    @Bean
+    public PlnAgent telegramBot() {
+        return new PlnAgent(telegramBotToken, telegramBotUsername);
+    }
+    ```
+
+- **Inicialização**:
+  - Ao iniciar o aplicativo, o bot estará registrado e pronto para receber mensagens dos usuários.
+
+#### **6.3.4. Teste do Bot**
+
+- Envie uma mensagem para o seu bot no Telegram para verificar se ele está respondendo conforme o esperado.
+- Certifique-se de que o bot está online e que o aplicativo está em execução.
+
 ---
 
 ## **7. Engenharia de Software Aplicada**
@@ -117,6 +176,7 @@ Os princípios **SOLID** foram aplicados durante o desenvolvimento do projeto pa
 
 ### **7.2. Arquitetura em Camadas**
 O projeto adota uma arquitetura em camadas, separando claramente as responsabilidades:
+
 - **Camada de Apresentação**: Responsável pela interação com o Telegram.
 - **Camada de Lógica de Negócio**: Onde ocorre o processamento das mensagens e a integração com serviços externos.
 - **Camada de Infraestrutura**: Gerencia operações como conversão de áudio e transcrição de voz.
@@ -136,6 +196,7 @@ O sistema utiliza práticas recomendadas para o gerenciamento de arquivos tempor
 O projeto foi desenvolvido com modularidade, facilitando a criação de testes unitários. A abordagem de injeção de dependência permite a utilização de simulações (mocks) para serviços externos, como a **API da Groq** e a **Spring AI**, possibilitando a verificação do comportamento do sistema sem necessidade de dependências externas durante os testes.
 
 Exemplos de módulos testáveis incluem:
+
 - **VoiceRecognitionService**: Testes para validar se a transcrição de áudio está ocorrendo conforme o esperado.
 - **AudioConversionService**: Testes para verificar a integridade da conversão de arquivos de áudio.
 
@@ -156,5 +217,6 @@ O gerenciamento eficiente de arquivos temporários e o respeito aos princípios 
 - **Spring AI Documentation**: [https://spring.io/projects/spring-ai](https://spring.io/projects/spring-ai)
 - **Groq Speech-to-Text API**: [https://console.groq.com/docs/speech-text](https://console.groq.com/docs/speech-text)
 - **Telegram Bots API Documentation**: [https://core.telegram.org/bots/api](https://core.telegram.org/bots/api)
+- **Telegram BotFather Instructions**: [https://core.telegram.org/bots#6-botfather](https://core.telegram.org/bots#6-botfather)
 - **FFmpeg Documentation**: [https://ffmpeg.org/ffmpeg.html](https://ffmpeg.org/ffmpeg.html)
 - **OpenAI GPT**: [https://openai.com/api/](https://openai.com/api/)
