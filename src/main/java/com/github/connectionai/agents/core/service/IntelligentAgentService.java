@@ -1,4 +1,4 @@
-package com.github.connectionai.agents.service;
+package com.github.connectionai.agents.core.service;
 
 import java.net.URL;
 
@@ -10,13 +10,13 @@ public class IntelligentAgentService implements AgentService{
 	
 	private final LLMInference llmInference;
 	
-	private final Recognition recognition;
+	private final RecognitionService recognition;
 	
-	private final Conversion conversion;
+	private final ConversionService conversion;
 
 	@Autowired
-	public IntelligentAgentService(final LLMInference llmInference, final Recognition recognition,
-			final Conversion conversion) {
+	public IntelligentAgentService(final LLMInference llmInference, final RecognitionService recognition,
+			final ConversionService conversion) {
 		
 		this.llmInference = llmInference;
 		this.recognition = recognition;

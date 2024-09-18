@@ -1,8 +1,8 @@
-package com.github.connectionai.agents.service;
+package com.github.connectionai.agents.core.service;
 
 import java.net.URL;
 
-public interface AgentService extends Conversion, Recognition, LLMInference {
+public interface AgentService extends ConversionService, RecognitionService, LLMInference {
 
 	default String processVoice(final URL sourceFile) {
 		

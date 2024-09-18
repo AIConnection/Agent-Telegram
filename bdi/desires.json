@@ -1,0 +1,14 @@
+{
+  "desires": [
+    {
+      "id": "assistUser",
+      "conditions": ["userInput != ''"],
+      "priority": 1
+    },
+    {
+      "id": "idle",
+      "conditions": ["userInput == ''"],
+      "priority": 2
+    }
+  ]
+}

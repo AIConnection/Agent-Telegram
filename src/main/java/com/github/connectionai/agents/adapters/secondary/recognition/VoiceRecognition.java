@@ -14,10 +14,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.github.connectionai.agents.service.Recognition;
+import com.github.connectionai.agents.core.service.RecognitionService;
 
 @Component
-public class VoiceRecognition implements Recognition {
+public class VoiceRecognition implements RecognitionService {
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
     

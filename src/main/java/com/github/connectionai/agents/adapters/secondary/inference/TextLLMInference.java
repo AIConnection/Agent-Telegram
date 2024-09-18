@@ -4,7 +4,7 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.github.connectionai.agents.service.LLMInference;
+import com.github.connectionai.agents.core.service.LLMInference;
 
 @Component
 public class TextLLMInference implements LLMInference {

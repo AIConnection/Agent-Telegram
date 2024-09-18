@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 import org.springframework.stereotype.Component;
 
-import com.github.connectionai.agents.service.Conversion;
+import com.github.connectionai.agents.core.service.ConversionService;
 
 import lombok.SneakyThrows;
 import ws.schild.jave.Encoder;
@@ -15,7 +15,7 @@ import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 
 @Component
-public class AudioConversion implements Conversion {
+public class AudioConversion implements ConversionService {
 
 	@Override
 	@SneakyThrows

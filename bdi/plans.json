@@ -1,0 +1,20 @@
+{
+  "plans": [
+    {
+      "id": "planAssistUser",
+      "desireId": "assistUser",
+      "actions": [
+        "AnalyzeUserInputAction",
+        "GeneratePromptAction",
+        "ProvideResponseAction"
+      ]
+    },
+    {
+      "id": "planIdle",
+      "desireId": "idle",
+      "actions": [
+        "WaitForUserInputAction"
+      ]
+    }
+  ]
+}

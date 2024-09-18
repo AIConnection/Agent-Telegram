@@ -1,0 +1,19 @@
+{
+  "beliefs": [
+    {
+      "name": "userInput",
+      "type": "String",
+      "initialValue": ""
+    },
+    {
+      "name": "context",
+      "type": "Map",
+      "initialValue": {}
+    },
+    {
+      "name": "conversationHistory",
+      "type": "List",
+      "initialValue": []
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-package com.github.connectionai.agents.service;
+package com.github.connectionai.agents.core.service;
 
 public interface LLMInference {
 	
