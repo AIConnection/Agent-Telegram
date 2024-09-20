@@ -5,21 +5,27 @@ import java.util.List;
 
 public interface Plan {
 	
-    String getDesireId();
-    List<Action> getActions();
-    
-	static Plan defaultPlan() {
+	public static Plan defaultPlan() {
 		return new Plan() {
 			
 			@Override
-			public String getDesireId() {
-				return "default-plan";
+			public String getId() {
+				return "plan-id";
 			}
 			
 			@Override
-			public List<Action> getActions() {
+			public String getDesireId() {
+				return "desire-id";
+			}
+			
+			@Override
+			public List<String> getActions() {
 				return Arrays.asList();
 			}
 		};
 	}
+	
+	String getId();
+    String getDesireId();
+    List<String> getActions();    
 }

@@ -1,12 +1,12 @@
 {
   "desires": [
     {
-      "id": "assistUser",
+      "desireId": "assistUser",
       "conditions": ["userInput != ''"],
       "priority": 1
     },
     {
-      "id": "idle",
+      "desireId": "idle",
       "conditions": ["userInput == ''"],
       "priority": 2
     }

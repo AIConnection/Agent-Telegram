@@ -2,7 +2,7 @@ package com.github.connectionai.agents.core.bdi;
 
 public interface Desire {
 	
-    boolean isApplicable(BeliefBase beliefBase);
+    boolean isApplicable(final BeliefBase beliefBase);
     
     int getPriority();
     

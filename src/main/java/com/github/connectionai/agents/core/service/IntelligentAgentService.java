@@ -5,7 +5,7 @@ import java.net.URL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("intelligentAgentService")
 public class IntelligentAgentService implements AgentService{
 	
 	private final LLMInference llmInference;

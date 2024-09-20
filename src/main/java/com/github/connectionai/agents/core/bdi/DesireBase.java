@@ -2,7 +2,7 @@ package com.github.connectionai.agents.core.bdi;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DesireBase {
+public abstract class DesireBase {
 
     private final List<Desire> desires;
 

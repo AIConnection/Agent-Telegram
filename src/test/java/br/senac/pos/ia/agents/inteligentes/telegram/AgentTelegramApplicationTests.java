@@ -8,6 +8,6 @@ class AgentTelegramApplicationTests {
 
 	@Test
 	void contextLoads() {
+		
 	}
-
 }

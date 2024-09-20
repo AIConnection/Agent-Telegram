@@ -8,12 +8,12 @@
     {
       "name": "context",
       "type": "Map",
-      "initialValue": {}
+      "initialValue": ""
     },
     {
       "name": "conversationHistory",
       "type": "List",
-      "initialValue": []
+      "initialValue": ""
     }
   ]
 }

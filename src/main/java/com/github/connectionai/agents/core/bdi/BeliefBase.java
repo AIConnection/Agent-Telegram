@@ -1,44 +1,50 @@
 package com.github.connectionai.agents.core.bdi;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class BeliefBase {
 
-    private final Map<String, Object> beliefs;
+    private final List<Belief> beliefs;
 
-    public BeliefBase(final Map<String, Object> initialBeliefs) {
+    public BeliefBase(final List<Belief> beliefs) {
     	
-        this.beliefs = Collections.synchronizedMap(initialBeliefs);
+        this.beliefs = beliefs;
     }
 
-    public Object getBelief(final String name) {
+    public Belief getBelief(final String name) {
     	
-        return beliefs.get(name);
+        return beliefs
+        		.stream()
+        		.filter(belief->belief.getName().equalsIgnoreCase(name))
+        		.findFirst()
+        		.orElse(null);
     }
 
-    public void updateBelief(final String name, final Object value) {
+    public void updateBelief(final Belief belief) {
     	
-        beliefs.put(name, value);
+    	final int indexOf = beliefs.indexOf(belief);
+    	if(indexOf > 0) {
+    		beliefs.set(indexOf, belief);
+    	}
     }
 
-    public Map<String, Object> getAllBeliefs() {
+    public Collection<Belief> getAllBeliefs() {
     	
         return beliefs;
     }
 
-	@SuppressWarnings("unchecked")
-	public void addHistory(final String topic, final Object response) {
+	public void addHistory(final Belief belief) {
 		
-		if(beliefs.containsKey(topic)) {
-			
-			((List<Object>)beliefs.get(topic)).add(response);
-			
-		}else {
-			
-			beliefs.put(topic, Collections.synchronizedList(Arrays.asList(response)));
-		}
+		beliefs.add(belief);
+	}
+	
+	public List<String> handles(){
+		
+		return beliefs
+				.stream()
+				.map(belief->belief.handle())
+				.collect(Collectors.toList());
 	}
 }

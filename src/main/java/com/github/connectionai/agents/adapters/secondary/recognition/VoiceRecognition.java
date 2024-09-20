@@ -2,6 +2,7 @@ package com.github.connectionai.agents.adapters.secondary.recognition;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -23,10 +24,13 @@ public class VoiceRecognition implements RecognitionService {
     
     private final String groqApiToken;
     
+    private final RestTemplate restTemplate;
+    
 
-    public VoiceRecognition(@Value("${spring.ai.openai.api-key}") final String groqApiToken) {
+    public VoiceRecognition(@Value("${spring.ai.openai.api-key}") final String groqApiToken, @Autowired final RestTemplate restTemplate) {
     	
     	this.groqApiToken = groqApiToken;
+    	this.restTemplate = restTemplate;
     }
 
     @Override
@@ -39,8 +43,6 @@ public class VoiceRecognition implements RecognitionService {
     	        return "voiceData.mp3";
     	    }
     	};
-    	
-        final RestTemplate restTemplate = new RestTemplate();
 
         final HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + groqApiToken);
