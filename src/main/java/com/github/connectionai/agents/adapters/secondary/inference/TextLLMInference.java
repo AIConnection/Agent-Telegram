@@ -1,8 +1,8 @@
 package com.github.connectionai.agents.adapters.secondary.inference;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -18,7 +18,10 @@ import com.github.connectionai.agents.core.service.LLMInference;
 import com.github.connectionai.agents.core.service.PLNService;
 import com.github.connectionai.agents.core.service.PromptGeneratorService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component("textLLMInference")
+@Slf4j
 public class TextLLMInference implements LLMInference, PLNService, PromptGeneratorService {
 
 	private final OpenAiChatModel openAiChatModel;
@@ -39,28 +42,48 @@ public class TextLLMInference implements LLMInference, PLNService, PromptGenerat
 	}
 
 	@Override
-	public String complete(final String text) {
+	public String complete(final String systemPrompt, final String userPrompt) {
 		
-		return complete(new Prompt(Arrays.asList(new UserMessage(text))));
+		log.info("m=complete, systemPrompt={}, userPrompt={}", systemPrompt, userPrompt);
+		
+		return complete(new Prompt(Arrays.asList(new SystemMessage(systemPrompt), new UserMessage(userPrompt))));
+	}
+	
+	@Override
+	public String complete(final String systemPrompt, final String userPrompt, final List<String> prompts) {
+		
+		log.info("m=complete, systemPrompt={}, userPrompt={}, prompts={}", systemPrompt, userPrompt, Arrays.toString(prompts.toArray()));
+		
+		final StringBuilder builder = new StringBuilder();
+		prompts.forEach(builder::append);
+		
+		final ArrayList<Message> bdiMessages = new ArrayList<>();
+
+		bdiMessages.add(new SystemMessage(systemPrompt));
+		bdiMessages.add(new UserMessage(builder.toString()));
+				
+		return complete(new Prompt(bdiMessages));
 	}
 
 	@Override
-	public String analyze(final String prompt) {
+	public String complete(final String userPrompt) {
 		
-		return generatePrompt(Arrays.asList(prompt));
+		log.info("m=complete, userPrompt={}", userPrompt);
+		
+		final Prompt prompt = new Prompt(userPrompt);
+		
+		return complete(prompt);
 	}
 
 	@Override
-	public String generatePrompt(final List<String> texts) {
+	public String generatePrompt(final List<String> metaPrompts) {
 		
-		final List<Message> messages = texts
+		final List<Message> messages = metaPrompts
 				.stream()
 				.map(text->(Message) new AssistantMessage(text))
-				.collect(Collectors.toList());
+				.toList();
 		
-		final SystemMessage systemMessage = new SystemMessage("gere um prompt rico e detalhado.");
-		
-		messages.add(systemMessage);
+		messages.add(new SystemMessage("crie prompts."));
 		
 		final Prompt prompt = new Prompt(messages);
 		

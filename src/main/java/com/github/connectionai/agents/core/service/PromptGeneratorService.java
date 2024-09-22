@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface PromptGeneratorService {
 
-    public String generatePrompt(final List<String> analysisResults);
+    public String generatePrompt(final List<String> metaPrompts);
 }

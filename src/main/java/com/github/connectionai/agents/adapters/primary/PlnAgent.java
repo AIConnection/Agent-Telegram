@@ -1,6 +1,5 @@
 package com.github.connectionai.agents.adapters.primary;
 
-import java.net.URL;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -14,22 +13,16 @@ import org.telegram.abilitybots.api.objects.Locality;
 import org.telegram.abilitybots.api.objects.MessageContext;
 import org.telegram.abilitybots.api.objects.Privacy;
 import org.telegram.abilitybots.api.objects.Reply;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.Voice;
 
+import com.github.connectionai.agents.core.MessageType;
 import com.github.connectionai.agents.core.service.AgentService;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class PlnAgent extends AbilityBot {
-	
-	private final String botToken;
 	
 	private final AgentService agentService;
 	
@@ -37,7 +30,6 @@ public class PlnAgent extends AbilityBot {
 		
 		super(botToken, "PlnAgent");
 		
-		this.botToken = botToken;
 		this.agentService = agentService;
 	}
 	
@@ -63,7 +55,8 @@ public class PlnAgent extends AbilityBot {
 	        .action(ctx -> {
 	            final String text = ctx.update().getMessage().getText();
 	            final String response = agentService.complete(text);
-	            responseMessage(ctx.update().getMessage().getChatId(), response);
+	            
+	            MessageType.responseMessage(ctx.update().getMessage().getChatId(), response, sender);
 	        })
 	        .build();
 	}
@@ -95,38 +88,24 @@ public class PlnAgent extends AbilityBot {
 			
 			log.info("m=action, ability: {}, update: {}", ability, update);
 			
-			if(voiceExist(update)) {
-				
-				log.info("m=action, voiceExist: {}", true);
-				
-				final String text = voiceToText(update);
-				
-				log.info("m=action, llmResponse: {}", text);
-				
-				responseMessage(update.getMessage().getChatId(), text);
-			}
+			final MessageType messageType = identifyMessageType(update);
+			
+			messageType.processMessage(agentService, update, sender);
+			
 		};
 	}
 
-	@SneakyThrows
-	private void responseMessage(final Long chatId, final String text) {
+	private MessageType identifyMessageType(final Update update) {
 		
-		final SendMessage sendMessage = new SendMessage(String.valueOf(chatId), text);
-	    sender.execute(sendMessage); 
-	}
-	
-	private boolean voiceExist(final Update update) {
+		if(update != null && update.getMessage() != null) {
+			
+			final boolean text = update.getMessage().getText() != null && !"".equalsIgnoreCase(update.getMessage().getText().trim());
+			final boolean hasVoice = update.getMessage().getVoice() != null;
+			
+			return MessageType.getMessageType(text, hasVoice);
+		}
 		
-		return update != null && update.getMessage() != null && update.getMessage().getVoice() != null;
-	}
-	
-	@SneakyThrows
-	private String voiceToText(final Update update) {
+		return MessageType.NONE;
 		
-		final Voice voice = update.getMessage().getVoice();
-		final File file = sender.execute(new GetFile(voice.getFileId()));
-		final String fileUrl = file.getFileUrl(botToken);
-		
-		return agentService.processVoice(new URL(fileUrl));
 	}
 }

@@ -1,14 +1,19 @@
 {
-  "desires": [
+  "items": [
     {
-      "desireId": "assistUser",
-      "conditions": ["userInput != ''"],
+      "desireId": "elaborar um roteiro detalhado.",
+      "conditions": ["verificar detalhadamente a veracidade Histórica."],
       "priority": 1
     },
     {
-      "desireId": "idle",
-      "conditions": ["userInput == ''"],
+      "desireId": "roteiro deve possuir um sentido lógico e fluido.",
+      "conditions": ["garantir sentido lógico de estudo e fluidez para uma melhor imersão."],
       "priority": 2
+    },
+    {
+      "desireId": "resposta em portugês",
+      "conditions": ["IMPORTANTE", "responda sempre em portugês."],
+      "priority": 3
     }
   ]
 }

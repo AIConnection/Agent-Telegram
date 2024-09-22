@@ -20,6 +20,6 @@ public class AnalyzeInputAction implements Action {
     @Override
     public String execute(final String prompt) {
         
-    	return plnService.analyze(prompt);
+    	return plnService.complete(prompt);
     }
 }

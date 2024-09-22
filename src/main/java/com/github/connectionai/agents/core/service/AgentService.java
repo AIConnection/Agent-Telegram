@@ -12,4 +12,11 @@ public interface AgentService extends ConversionService, RecognitionService, LLM
 		
 		return complete(text);
 	}
+
+	default String processText(final String text) {
+		
+		return complete(text);
+	}
+	
+	String getBotToken();
 }

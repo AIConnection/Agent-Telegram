@@ -1,78 +1,121 @@
 package com.github.connectionai.agents.core.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.github.connectionai.agents.core.bdi.Action;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.connectionai.agents.adapters.secondary.inference.TextLLMInference;
 import com.github.connectionai.agents.core.bdi.ActionExecutor;
+import com.github.connectionai.agents.core.bdi.Belief;
 import com.github.connectionai.agents.core.bdi.BeliefBase;
 import com.github.connectionai.agents.core.bdi.Desire;
 import com.github.connectionai.agents.core.bdi.DesireBase;
-import com.github.connectionai.agents.core.bdi.IntentionPlanner;
-import com.github.connectionai.agents.core.bdi.Plan;
+import com.github.connectionai.agents.core.bdi.Plans;
+import com.github.connectionai.agents.core.bdi.pln.TaskResponse;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class BDIService {
 
-	private final ApplicationContext applicationContext;
 	private final BeliefBase beliefBase;
     private final DesireBase desireBase;
-    private final PromptGeneratorService promptGeneratorService;
-    private final IntentionPlanner intentionPlanner;
-    private final ActionExecutor actionExecutor;
+    private final Plans plans;
+    private final TextLLMInference textLLMInference;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public BDIService(final ApplicationContext applicationContext, final BeliefBase beliefBase, final DesireBase desireBase, final PromptGeneratorService promptGeneratorService, final IntentionPlanner intentionPlanner, final ActionExecutor actionExecutor) {
-        this.applicationContext = applicationContext;
+    public BDIService(
+    		final BeliefBase beliefBase, 
+    		final DesireBase desireBase, 
+    		final Plans plans,
+    		final TextLLMInference textLLMInference,
+    		final PromptGeneratorService promptGeneratorService,
+    		final ActionExecutor actionExecutor, 
+    		final ObjectMapper objectMapper) {
+    	
     	this.beliefBase = beliefBase;
         this.desireBase = desireBase;
-        this.promptGeneratorService = promptGeneratorService;
-        this.intentionPlanner = intentionPlanner;
-        this.actionExecutor = actionExecutor;
+        this.plans = plans;
+        this.textLLMInference = textLLMInference;
+        this.objectMapper = objectMapper;
     }
     
-    public void doAction(final String userInput) {
-    	final String prompt = perceive(userInput);
-    	deliberate(prompt);
+    public Pair<String, Boolean> doAction(final String userInput) {
+    	
+    	log.info("m=doAction, userInput={}", userInput);
+    	
+    	final TaskResponse nplTaskResponse = perceive(userInput);
+    	
+    	if(nplTaskResponse != null && nplTaskResponse.getFailbackUserMessage() != null && !nplTaskResponse.getFailbackUserMessage().trim().equals("")) {
+    		return Pair.of(nplTaskResponse.getFailbackUserMessage(), false);
+    	}else {
+    		return Pair.of(deliberate(userInput, nplTaskResponse), true);
+    	}	
     }
 
-    private String perceive(final String userInput) {
+    @SneakyThrows
+    private TaskResponse perceive(final String userInput) {
     	
-    	final List<String> metaPrompts = beliefBase
+    	log.info("m=perceive, userInput={}", userInput);
+    	
+    	final String systemPrompt = beliefBase
     			.getAllBeliefs()
     			.stream()
-    			.map(belief->belief.handle())
-    			.collect(Collectors.toList());
+    			.map(Belief::handle)
+    			.reduce((a,b)->"-".concat(a).concat("\n").concat(b))
+    			.get();
     	
-    	metaPrompts.add(userInput);
-
-    	return promptGeneratorService.generatePrompt(metaPrompts);
+    	final String json = textLLMInference.complete(systemPrompt, userInput);
     	
+    	try {
+    		
+    		return objectMapper.readValue(json, TaskResponse.class);
+    	}catch (final Exception e) {
+    		
+    		log.error("m=perceive, result={}", json, e);
+    		
+    		return TaskResponse
+    				.builder()
+    				.failbackUserMessage(json)
+    				.build();
+		}
     }
 
-    private void deliberate(final String prompt) {
+    private String deliberate(final String userInput, final TaskResponse nplTaskResponse) {
     	
-    	final List<Desire> applicableDesires = desireBase.getApplicableDesires(beliefBase);
-        
-    	if (!applicableDesires.isEmpty()) {
+    	log.info("m=deliberate, taskResponse={}", nplTaskResponse);
 
-        	final Desire topDesire = applicableDesires.get(0);
-        	
-        	final Plan plan = intentionPlanner.selectPlan(topDesire);
-        	
-        	actionExecutor.executeActions(getActions(plan.getActions()), prompt);
-        }
+    	final List<Desire> desires = desireBase.getApplicableDesires(beliefBase);
+    	
+    	final StringBuilder builder = new StringBuilder();
+    	builder.append(nplTaskResponse + "nplTaskResponse:" + nplTaskResponse + "\n");
+    	builder.append("userInput:" + userInput + "\n");
+    	
+    	plans
+    		.getItems()
+    		.stream()
+    		.filter(plan->desires.contains(findDesire(desires, plan.getDesireId())))
+    		.forEach(plan->{
+    			
+    			final List<String> actions = plan.getActions();
+    			actions.forEach(action->builder.append("-" + action + "\n"));
+    		});
+    	
+    	return textLLMInference.complete(builder.toString());
     }
+	
+	private Desire findDesire(final List<Desire> desires, final String desireId) {
 
-	private List<Action> getActions(final List<String> actions) {
-
-		return actions
+		return desires
 				.stream()
-				.map(action->applicationContext.getBean(action, Action.class))
-				.toList();
+				.filter(desire->desire.getDesireId().equalsIgnoreCase(desireId))
+				.findFirst()
+				.orElseThrow();
 	}
 }

@@ -1,19 +1,21 @@
 {
-  "plans": [
+  "items": [
     {
-      "id": "planAssistUser",
-      "desireId": "assistUser",
+      "id": "plano de estudo",
+      "desireId": "elaborar um roteiro detalhado.",
       "actions": [
-        "AnalyzeUserInputAction",
-        "GeneratePromptAction",
-        "ProvideResponseAction"
+        "plano de estudo deve possuir uma sequencia lógica e cronológica.",
+        "plano de estudo deve abranger os fatos e eventos e pessoas relevantes.",
+        "plano de estudo deve possui um tom didatico e discontraido"
       ]
     },
     {
-      "id": "planIdle",
-      "desireId": "idle",
+      "id": "organização do plano",
+      "desireId": "roteiro deve possuir um sentido lógico e fluido.",
       "actions": [
-        "WaitForUserInputAction"
+        "organizar o roteiro por eventos cronologicos.",
+        "organizar o roteiro por localidades.",
+        "organizar o roteiro por pessoais importantes."
       ]
     }
   ]

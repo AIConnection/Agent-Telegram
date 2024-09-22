@@ -1,6 +1,6 @@
 package com.github.connectionai.agents.core.bdi;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class DesireBase {
 
@@ -16,6 +16,6 @@ public abstract class DesireBase {
         return desires.stream()
                 .filter(desire -> desire.isApplicable(beliefBase))
                 .sorted((d1, d2) -> Integer.compare(d1.getPriority(), d2.getPriority()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

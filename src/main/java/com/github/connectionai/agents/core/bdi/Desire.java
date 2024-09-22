@@ -1,10 +1,14 @@
 package com.github.connectionai.agents.core.bdi;
 
+import java.util.List;
+
 public interface Desire {
 	
-    boolean isApplicable(final BeliefBase beliefBase);
+    List<String> getConditions();
     
-    int getPriority();
+    Integer getPriority();
     
-    String getId();
+    String getDesireId();
+
+	Boolean isApplicable(final BeliefBase beliefBase);
 }

@@ -12,10 +12,10 @@ import lombok.Data;
 @Builder
 public class Plans {
 
-	private final List<AgentPlan> plans;
+	private final List<AgentPlan> items;
 
 	@JsonCreator
-	public Plans(@JsonProperty("plans") final List<AgentPlan> plans) {
-		this.plans = plans;
+	public Plans(@JsonProperty("items") final List<AgentPlan> items) {
+		this.items = items;
 	}	
 }

@@ -2,6 +2,6 @@ package com.github.connectionai.agents.core.service;
 
 public interface PLNService {
 
-	String analyze(final String prompt);
+	String complete(final String prompt);
 	
 }
