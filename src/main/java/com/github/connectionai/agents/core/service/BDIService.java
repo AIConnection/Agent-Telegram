@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.connectionai.agents.adapters.secondary.inference.TextLLMInference;
 import com.github.connectionai.agents.core.bdi.ActionExecutor;
 import com.github.connectionai.agents.core.bdi.Belief;
@@ -14,7 +13,7 @@ import com.github.connectionai.agents.core.bdi.BeliefBase;
 import com.github.connectionai.agents.core.bdi.Desire;
 import com.github.connectionai.agents.core.bdi.DesireBase;
 import com.github.connectionai.agents.core.bdi.Plans;
-import com.github.connectionai.agents.core.bdi.pln.TaskResponse;
+import com.github.connectionai.agents.core.bdi.pln.PLNBase;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,78 +22,74 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BDIService {
 
+	private final PLNBase plnBase;
 	private final BeliefBase beliefBase;
     private final DesireBase desireBase;
     private final Plans plans;
     private final TextLLMInference textLLMInference;
-    private final ObjectMapper objectMapper;
 
     @Autowired
     public BDIService(
+    		final PLNBase plnBase,
     		final BeliefBase beliefBase, 
     		final DesireBase desireBase, 
     		final Plans plans,
     		final TextLLMInference textLLMInference,
     		final PromptGeneratorService promptGeneratorService,
-    		final ActionExecutor actionExecutor, 
-    		final ObjectMapper objectMapper) {
+    		final ActionExecutor actionExecutor) {
     	
+    	this.plnBase = plnBase;
     	this.beliefBase = beliefBase;
         this.desireBase = desireBase;
         this.plans = plans;
         this.textLLMInference = textLLMInference;
-        this.objectMapper = objectMapper;
     }
     
     public Pair<String, Boolean> doAction(final String userInput) {
     	
     	log.info("m=doAction, userInput={}", userInput);
     	
-    	final TaskResponse nplTaskResponse = perceive(userInput);
+    	final String nplTaskResponse = perceive(userInput);
     	
-    	if(nplTaskResponse != null && nplTaskResponse.getFailbackUserMessage() != null && !nplTaskResponse.getFailbackUserMessage().trim().equals("")) {
-    		return Pair.of(nplTaskResponse.getFailbackUserMessage(), false);
-    	}else {
-    		return Pair.of(deliberate(userInput, nplTaskResponse), true);
-    	}	
+    	final String analyseResult = analyse(nplTaskResponse, userInput);
+		
+		return Pair.of(deliberate(userInput, analyseResult), true);
     }
 
-    @SneakyThrows
-    private TaskResponse perceive(final String userInput) {
+	@SneakyThrows
+    private String perceive(final String userInput) {
     	
     	log.info("m=perceive, userInput={}", userInput);
     	
-    	final String systemPrompt = beliefBase
-    			.getAllBeliefs()
+    	final String systemPrompt = plnBase
+    			.handles()
     			.stream()
-    			.map(Belief::handle)
-    			.reduce((a,b)->"-".concat(a).concat("\n").concat(b))
+    			.reduce((a,b)->a.concat(b))
     			.get();
-    	
-    	final String json = textLLMInference.complete(systemPrompt, userInput);
-    	
-    	try {
-    		
-    		return objectMapper.readValue(json, TaskResponse.class);
-    	}catch (final Exception e) {
-    		
-    		log.error("m=perceive, result={}", json, e);
-    		
-    		return TaskResponse
-    				.builder()
-    				.failbackUserMessage(json)
-    				.build();
-		}
-    }
 
-    private String deliberate(final String userInput, final TaskResponse nplTaskResponse) {
+    	return textLLMInference.complete(systemPrompt, userInput);
+    }
+	
+    private String analyse(final String plnTaskResponse, final String userInput) {
+
+    	final String sumary = Belief.createBeliefSummary(this.beliefBase.getAllBeliefs());
     	
-    	log.info("m=deliberate, taskResponse={}", nplTaskResponse);
+		return constructNarrative(sumary, userInput + ":" + plnTaskResponse);
+	}
+
+    private String constructNarrative(final String sumary, final String userInputWithPLNTaskResponse) {
+    	
+		return textLLMInference.complete(sumary, userInputWithPLNTaskResponse);
+	}
+
+	private String deliberate(final String userInput, final String analyseResult) {
+    	
+    	log.info("m=deliberate, analyseResult={}", analyseResult);
 
     	final List<Desire> desires = desireBase.getApplicableDesires(beliefBase);
     	
     	final StringBuilder builder = new StringBuilder();
-    	builder.append(nplTaskResponse + "nplTaskResponse:" + nplTaskResponse + "\n");
+    	builder.append(analyseResult + "nplTaskResponse:" + analyseResult + "\n");
     	builder.append("userInput:" + userInput + "\n");
     	
     	plans

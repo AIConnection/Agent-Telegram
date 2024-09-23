@@ -1,4 +1,4 @@
-package br.senac.pos.ia.agents.inteligentes.telegram;
+package com.github.connectionai.agents;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

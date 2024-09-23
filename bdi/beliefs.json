@@ -14,18 +14,18 @@
     },
     {
       "name": "tarefa 3",
-      "initialValue": "identifique e classifique desejos"
-    },
-    {
-      "name": "tarefa 3",
-      "initialValue": "identifique e classifique desejos"
+      "initialValue": "identifique e classifique crenças"
     },
     {
       "name": "tarefa 4",
-      "initialValue": "identifique e classifique intenções"
+      "initialValue": "identifique e classifique desejos"
     },
     {
       "name": "tarefa 5",
+      "initialValue": "identifique e classifique intenções"
+    },
+    {
+      "name": "tarefa 6",
       "initialValue": "encontre perguntas"
     },
     {
@@ -37,7 +37,7 @@
       "initialValue": "avalie a extrutura gramatical e identifique sujeitos"
     },
     {
-      "name": "tarefa 8",
+      "name": "tarefa 9",
       "initialValue": "avalie a extrutura gramatical e identifique verbos"
     },
     {
@@ -58,7 +58,7 @@
     },
     {
       "name": "IMPORTANTE",
-      "initialValue": "GERE APENAS O JSON NA RESPOSTA, NÃ FAÇA NENHUM COMENTARIO."
+      "initialValue": "GERE APENAS O JSON NA RESPOSTA, NÃO FAÇA NENHUM COMENTARIO."
     }
   ]
 }

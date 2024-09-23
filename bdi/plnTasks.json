@@ -1,0 +1,65 @@
+{
+  "items": [
+    {
+      "name": "context",
+      "description": "execute as tarefas de processamento de linguagem natural."
+    },
+    {
+      "name": "tarefa 1",
+      "description": "extrair entidades nomeadas"
+    },
+    {
+      "name": "tarefa 2",
+      "description": "analisar sentimentos"
+    },
+    {
+      "name": "tarefa 3",
+      "description": "identifique e classifique crenças"
+    },
+    {
+      "name": "tarefa 4",
+      "description": "identifique e classifique desejos"
+    },
+    {
+      "name": "tarefa 5",
+      "description": "identifique e classifique intenções"
+    },
+    {
+      "name": "tarefa 6",
+      "description": "encontre perguntas"
+    },
+    {
+      "name": "tarefa 7",
+      "description": "encontre afirmações"
+    },
+    {
+      "name": "tarefa 8",
+      "description": "avalie a extrutura gramatical e identifique sujeitos"
+    },
+    {
+      "name": "tarefa 9",
+      "description": "avalie a extrutura gramatical e identifique verbos"
+    },
+    {
+      "name": "tarefa 10",
+      "description": "avalie a extrutura gramatical e identifique objetos"
+    },
+    {
+      "name": "tarefa 11",
+      "description": "encontre referências entre entidades"
+    },
+    {
+      "name": "response format",
+      "description": "application/json"
+    },
+    {
+      "name": "response content",
+      "description": "{ \"failbackUserMessage\": \"\", \"tasks\": [ { \"task_name\": \"string\", \"task_id\": number, \"result\": [ { \"string\": \"string\" }, { \"string\": \"string\" }, { \"color\": \"string\" } ], \"metrics\": { \"precision\": 0.9, \"recall\": 0.8, \"F1-score\": 0.85, \"accuracy\": 0.9 }, \"threshold\": 0.5 }, { \"task_name\": \"string\", \"task_id\": 2, \"result\": [ { \"sentiment_analysis\": \"negative,neutral,positive\" } ], \"metrics\": { \"precision\": number, \"recall\": number, \"F1-score\": number, \"accuracy\": number }, \"threshold\": number }, { \"task_name\": \"string\", \"task_id\": number, \"result\": [ { \"question\": \"string\" } ], \"metrics\": { \"precision\": number, \"recall\": number, \"F1-score\": number, \"accuracy\": number }, \"threshold\": number }, { \"task_name\": \"string\", \"task_id\": number, \"result\": [ { \"statement\": \"string\" } ], \"metrics\": { \"precision\": number, \"recall\": number, \"F1-score\": number, \"accuracy\": number }, \"threshold\": number }, { \"task_name\": \"string\", \"task_id\": number, \"result\": [ { \"subject\": \"string\" }, { \"verb\": \"string\" }, { \"object\": \"string\" } ], \"metrics\": { \"precision\": number, \"recall\": number, \"F1-score\": number, \"accuracy\": number }, \"threshold\": number }, { \"task_name\": \"string\", \"task_id\": number, \"references\": [ { \"entity_name\": \"string\" }, { \"pronoun\": \"string\" } ], \"metrics\": { \"precision\": number, \"recall\": number, \"F1-score\": number, \"accuracy\": number }, \"threshold\": number } ] }"
+    },
+    {
+      "name": "IMPORTANTE",
+      "description": "GERE APENAS O JSON NA RESPOSTA, NÃO FAÇA NENHUM COMENTARIO."
+    }
+  ]
+}
+

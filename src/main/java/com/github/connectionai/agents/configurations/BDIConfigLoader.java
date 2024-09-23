@@ -15,6 +15,7 @@ import com.github.connectionai.agents.core.bdi.Desire;
 import com.github.connectionai.agents.core.bdi.DesireBase;
 import com.github.connectionai.agents.core.bdi.Desires;
 import com.github.connectionai.agents.core.bdi.Plans;
+import com.github.connectionai.agents.core.bdi.pln.PLNTasks;
 
 import lombok.SneakyThrows;
 
@@ -26,6 +27,12 @@ public class BDIConfigLoader {
 	@Autowired
 	public BDIConfigLoader(final ObjectMapper mapper) {
 		this.mapper = mapper;
+	}
+	
+	@Bean
+	public PLNTasks plnTasks() throws IOException {
+	
+		return mapper.readValue(new File("bdi/plnTasks.json"), PLNTasks.class);
 	}
 
     @Bean

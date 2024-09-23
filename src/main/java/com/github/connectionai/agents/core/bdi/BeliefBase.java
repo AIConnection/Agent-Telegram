@@ -49,14 +49,4 @@ public abstract class BeliefBase {
 		
 		items.add(belief);
 	}
-	
-	public List<String> handles(){
-		
-		log.info("m=addHistory, handles={}");
-		
-		return items
-				.stream()
-				.map(Belief::handle)
-				.toList();
-	}
 }
