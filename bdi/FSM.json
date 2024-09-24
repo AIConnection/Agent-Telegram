@@ -1,0 +1,36 @@
+{
+  "states": [
+    {
+      "name": "AWAITING_USER_INPUT",
+      "transitions": [
+        {
+          "trigger": "user_asks_question",
+          "target": "PROCESSING_RESPONSE",
+          "condition": "llm_understands_question"
+        }
+      ]
+    },
+    {
+      "name": "PROCESSING_RESPONSE",
+      "transitions": [
+        {
+          "trigger": "response_ready",
+          "target": "WAITING_FOR_CONFIRMATION"
+        }
+      ]
+    },
+    {
+      "name": "WAITING_FOR_CONFIRMATION",
+      "transitions": [
+        {
+          "trigger": "user_confirms",
+          "target": "COMPLETED"
+        }
+      ]
+    },
+    {
+      "name": "COMPLETED",
+      "transitions": []
+    }
+  ]
+}
