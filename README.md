@@ -2,7 +2,16 @@
 
 ## **1. Introdução**
 
-Este documento descreve o desenvolvimento de um agente virtual inteligente que interage com usuários via **Telegram**, utilizando **Spring Boot**, **Spring AI** e a biblioteca **telegrambots-abilities**. O agente é capaz de processar mensagens de texto e de voz, utilizando a **API da Groq** para converter áudio em texto e um **Large Language Model (LLM)** para gerar respostas contextuais. A arquitetura foi projetada com foco em modularidade, escalabilidade e aderência aos princípios de **Engenharia de Software**.
+Este projeto desenvolve um agente virtual inteligente que interage com usuários via Telegram, processando mensagens de texto e voz. Utiliza Spring Boot, Spring AI, telegrambots-abilities e um Large Language Model (LLM) para gerar respostas contextuais e inteligentes. Além disso, o agente é implementado com um módulo BDI (Belief-Desire-Intention), que modela o comportamento do agente com base em suas crenças, desejos e intenções. Este documento descreve tanto a arquitetura do sistema quanto os aspectos teóricos e práticos que fundamentam a implementação, com foco em PLN, Reconhecimento de Voz e a integração com o módulo BDI.
+
+**Objetivo Didático**
+
+Este projeto visa demonstrar como construir um agente inteligente usando conceitos avançados de:
+
+    Processamento de Linguagem Natural (PLN), através da integração com LLMs.
+    Reconhecimento de Voz, convertendo áudio em texto utilizando serviços externos.
+    Modelo BDI (Belief-Desire-Intention), que permite que o agente virtual tenha um comportamento baseado em crenças, desejos e intenções.
+    Princípios de Engenharia de Software, como modularidade, escalabilidade e separação de responsabilidades, aplicados ao desenvolvimento de um sistema distribuído.
 
 ---
 
@@ -12,14 +21,13 @@ Este documento descreve o desenvolvimento de um agente virtual inteligente que i
 - O sistema deve ser capaz de receber e processar mensagens de texto enviadas pelos usuários no Telegram.
 - O sistema deve converter mensagens de voz em texto e processar a transcrição.
 - O sistema deve integrar-se com um **Large Language Model (LLM)** para gerar respostas inteligentes baseadas nas mensagens dos usuários.
-- O sistema deve retornar a resposta gerada pelo **LLM** ao usuário no Telegram, seja em resposta a mensagens de texto ou voz.
+- O módulo BDI deve permitir que o agente interprete o contexto com base em crenças, desejos e intenções.O módulo BDI deve permitir que o agente interprete o contexto com base em crenças, desejos e intenções.
+- O sistema deve retornarar a resposta gerada pelo **LLM**** ao usuário no Telegram, seja em resposta a mensagens de texto ou voz.
 
 ### **2.2. Não Funcionais**
-- O sistema deve ser modular e escalável.
-- Deve garantir tempo de resposta adequado para interações em tempo real, considerando a integração com serviços externos.
-- A arquitetura deve facilitar substituições de serviços externos (como a API de reconhecimento de voz) sem grandes modificações.
-- A modularidade do sistema deve permitir fácil manutenção e testes unitários.
-
+- Arquitetura modular que permita a fácil substituição de componentes (como a API de reconhecimento de voz ou o modelo de linguagem).
+- Tempo de resposta adequado para interações em tempo real.
+- O sistema deve ser escalável e fácil de estender, respeitando os princípios SOLID.
 ---
 
 ## **3. Arquitetura do Sistema**
@@ -45,6 +53,33 @@ O sistema segue uma arquitetura composta por três componentes principais:
 - **Spring AI Integration**: Módulo que realiza a comunicação com o **LLM** para processar entradas de texto ou transcrições e gerar respostas inteligentes.
 
 ---
+
+### 3.3. Módulo BDI
+
+O módulo BDI (Belief-Desire-Intention) é uma parte central da inteligência do agente. Ele é baseado no modelo cognitivo BDI, amplamente utilizado para representar agentes racionais. O modelo BDI utiliza três componentes principais:
+
+    Crenças (Beliefs): Representam o conhecimento que o agente possui sobre o ambiente. Isso inclui tanto informações externas, como os dados recebidos do usuário, quanto informações internas, como o estado atual do agente.
+    Desejos (Desires): São os objetivos ou metas que o agente deseja alcançar. Eles representam o estado final que o agente pretende atingir.
+    Intenções (Intentions): São os planos ou estratégias que o agente escolhe para realizar seus desejos com base em suas crenças. As intenções representam os compromissos do agente para agir em direção a um objetivo.
+
+3.3.1. Estrutura do Módulo BDI
+
+O módulo BDI é composto por diversas classes e serviços, organizados da seguinte forma:
+
+    BeliefBase: Um repositório que mantém todas as crenças do agente. Este componente armazena o conhecimento acumulado, como as interações passadas com o usuário, percepções sobre o ambiente e informações sobre o estado atual do agente.
+    DesireBase: Mantém uma lista de desejos que o agente deseja atingir. Esses desejos podem ser estáticos (definidos no código) ou dinâmicos (gerados a partir de interações com o ambiente ou o usuário).
+    Plan Executor (Intention): A intenção é o plano de ação escolhido pelo agente para alcançar seus desejos. O agente escolhe planos com base nas suas crenças atuais e nos desejos que ele está comprometido em realizar.
+
+3.3.2. Integração do BDI com o LLM
+
+O módulo BDI está diretamente integrado com o LLM. Após a execução de uma tarefa de PLN (Processamento de Linguagem Natural) ou o recebimento de uma nova crença, o agente avalia suas intenções com base no contexto atual. Esse contexto é enriquecido pelas respostas geradas pelo LLM.
+
+Exemplo de fluxo de integração:
+
+    O usuário envia uma mensagem de texto ou voz.
+    A mensagem é processada pelo LLM, que gera uma resposta preliminar.
+    O BDI avalia a resposta, atualiza suas crenças e verifica se algum desejo foi atendido ou se novas intenções precisam ser geradas.
+    A resposta final é enviada ao usuário, considerando o estado atual do agente.
 
 ## **4. Conceitos Aplicados**
 
@@ -220,3 +255,9 @@ O gerenciamento eficiente de arquivos temporários e o respeito aos princípios 
 - **Telegram BotFather Instructions**: [https://core.telegram.org/bots#6-botfather](https://core.telegram.org/bots#6-botfather)
 - **FFmpeg Documentation**: [https://ffmpeg.org/ffmpeg.html](https://ffmpeg.org/ffmpeg.html)
 - **OpenAI GPT**: [https://openai.com/api/](https://openai.com/api/)
+- **Intelligent Agents: Theory and Practice** – Michael Wooldridge e Nicholas R. Jennings: [https://www.sciencedirect.com/science/article/pii/S0004370297000521](https://www.sciencedirect.com/science/article/pii/S0004370297000521)
+- **Reasoning About Rational Agents** – Michael Wooldridge: [https://mitpress.mit.edu/books/reasoning-about-rational-agents](https://mitpress.mit.edu/books/reasoning-about-rational-agents)
+- **Speech and Language Processing** – Daniel Jurafsky e James H. Martin: [https://web.stanford.edu/~jurafsky/slp3/](https://web.stanford.edu/~jurafsky/slp3/)
+- **Natural Language Processing with Transformers** – Lewis Tunstall, Leandro von Werra, and Thomas Wolf: [https://www.oreilly.com/library/view/natural-language-processing/9781098103231/](https://www.oreilly.com/library/view/natural-language-processing/9781098103231/)
+- **Neural-Symbolic Cognitive Reasoning** – Artur d’Avila Garcez, Luís C. Lamb, Dov M. Gabbay: [https://dl.acm.org/doi/book/10.5555/1615544](https://dl.acm.org/doi/book/10.5555/1615544)
+- **Combining Machine Learning and Knowledge Representation in Autonomous Agents** – David L. Poole e Alan Mackworth: [https://dl.acm.org/doi/10.1145/2832249](https://dl.acm.org/doi/10.1145/2832249)
