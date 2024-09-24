@@ -42,4 +42,9 @@ public class FSM {
 		
 		return systemPrompt;
 	}
+
+	public boolean containsState(final String nextState) {
+
+		return this.statesMap.containsKey(nextState);
+	}
 }
