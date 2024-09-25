@@ -11,6 +11,8 @@ import com.github.aiconnection.agents.core.bdi.Desire;
 import com.github.aiconnection.agents.core.bdi.DesireBase;
 import com.github.aiconnection.agents.core.bdi.Plans;
 import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
+import com.github.aiconnection.agents.core.fsm.State;
+import com.github.aiconnection.agents.core.fsm.StateTransitionHandler;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BDIService {
 
+	private final StateTransitionHandler stateTransitionHandler;
     private final PLNBase plnBase;
     private final BeliefBase beliefBase;
     private final DesireBase desireBase;
@@ -27,11 +30,14 @@ public class BDIService {
 
     @Autowired
     public BDIService(
+    		final StateTransitionHandler stateTransitionHandler,
             final PLNBase plnBase,
             final BeliefBase beliefBase, 
             final DesireBase desireBase, 
             final Plans plans,
             final TextLLMInference textLLMInference) {
+    	
+    	this.stateTransitionHandler = stateTransitionHandler;
         this.plnBase = plnBase;
         this.beliefBase = beliefBase;
         this.desireBase = desireBase;
@@ -62,8 +68,10 @@ public class BDIService {
     @SneakyThrows
     private String perceive(final String userInput) {
         log.info("m=perceive, userInput={}", userInput);
+        
+        final State currentState = stateTransitionHandler.perceptiveState(userInput);
 
-        final String systemPrompt = generateSystemPrompt();
+        final String systemPrompt = generateSystemPrompt(currentState);
         
         return inferUsingLLM(systemPrompt, userInput);
     }
@@ -72,13 +80,9 @@ public class BDIService {
      * Gera o prompt do sistema com base no PLN.
      * @return prompt gerado.
      */
-    private String generateSystemPrompt() {
+    private String generateSystemPrompt(final State currentState) {
     	
-        return plnBase
-        		.handles()
-        		.stream()
-        		.reduce(String::concat)
-        		.orElseThrow(() -> new RuntimeException("No system prompt available"));
+    	return currentState.generateSystemPrompt(this.plnBase);
     }
 
     /**

@@ -14,6 +14,11 @@
       "name": "PROCESSING_RESPONSE",
       "transitions": [
         {
+          "trigger": "back_user_input",
+          "target": "AWAITING_USER_INPUT",
+          "condition": "error_while_processing"
+        },
+        {
           "trigger": "response_ready",
           "target": "WAITING_FOR_CONFIRMATION"
         }
@@ -22,6 +27,11 @@
     {
       "name": "WAITING_FOR_CONFIRMATION",
       "transitions": [
+        {
+          "trigger": "back_user_input",
+          "target": "PROCESSING_RESPONSE",
+          "condition": "error_while_confirm"
+        },
         {
           "trigger": "user_confirms",
           "target": "COMPLETED"

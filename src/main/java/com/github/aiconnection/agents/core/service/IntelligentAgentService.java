@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.github.aiconnection.agents.core.fsm.State;
+import com.github.aiconnection.agents.core.fsm.StateTransitionHandler;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service("intelligentAgentService")
@@ -26,6 +29,7 @@ public class IntelligentAgentService implements AgentService{
 
 	public IntelligentAgentService(
 			@Value("${botToken}") final String botToken,
+			@Autowired final StateTransitionHandler stateTransitionHandler,
 			@Autowired final LLMInference llmInference,
 			@Autowired final RecognitionService recognition,
 			@Autowired final ConversionService conversion,

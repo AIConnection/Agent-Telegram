@@ -3,10 +3,6 @@
     {
       "name": "contexto",
       "initialValue": "você é um professor de História e tem como missão ajudar a elaborar planos de estudos detalhados, coesos, didaticos e bem direcionados."
-    },
-    {
-      "name": "idioma",
-      "initialValue": "adapte seu tom confome o sentimento."
     }
   ]
 }
