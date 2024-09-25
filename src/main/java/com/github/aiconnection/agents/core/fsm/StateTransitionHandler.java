@@ -1,10 +1,12 @@
 package com.github.aiconnection.agents.core.fsm;
 
+import java.util.Optional;
+
 public interface StateTransitionHandler {
 	
 	default State execute(final String userInput) {
 		
-		final State currentState = perceptiveState(userInput);
+		final State currentState = perceiveState(userInput).orElseThrow();
 		
 		return currentState
 				.getTransitions()
@@ -15,7 +17,7 @@ public interface StateTransitionHandler {
 				.orElse(currentState);
 	}
 	
-	State perceptiveState(final String userInput);
+	Optional<State> perceiveState(final String userInput);
 
 	Boolean checkCondition(final Transition transition, final State currentState, final String userInput);
 

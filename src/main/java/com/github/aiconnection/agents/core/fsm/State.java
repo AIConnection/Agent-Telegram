@@ -7,9 +7,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class State {
 	
     private final String name;
@@ -30,6 +32,10 @@ public class State {
 		return plnBase
         		.handles()
         		.stream()
+        		.map(handle->String.format(handle, name))
+        		.map(handle->String.format(handle, transitions
+							        				.stream()
+							        				.map(Transition::handle)))
         		.reduce(String::concat)
         		.orElseThrow(() -> new RuntimeException("No system prompt available"));
 	}

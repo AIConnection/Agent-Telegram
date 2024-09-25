@@ -69,9 +69,9 @@ public class BDIService {
     private String perceive(final String userInput) {
         log.info("m=perceive, userInput={}", userInput);
         
-        final State currentState = stateTransitionHandler.perceptiveState(userInput);
+        final State nextState = stateTransitionHandler.execute(userInput);
 
-        final String systemPrompt = generateSystemPrompt(currentState);
+        final String systemPrompt = generateSystemPrompt(nextState);
         
         return inferUsingLLM(systemPrompt, userInput);
     }

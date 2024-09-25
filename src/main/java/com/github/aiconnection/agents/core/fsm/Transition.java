@@ -1,6 +1,7 @@
 package com.github.aiconnection.agents.core.fsm;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -22,4 +23,15 @@ public class Transition {
 		this.target = target;
 		this.condition = condition;
 	}
+    
+    @JsonIgnore
+    public String handle() {
+    	
+        return String.format(
+            "-Trigger: '%s'. Target state: '%s'. Condition to fulfill: '%s'. Please infer the next action based on this transition.\n", 
+            trigger, 
+            target, 
+            condition
+        );
+    }
 }
