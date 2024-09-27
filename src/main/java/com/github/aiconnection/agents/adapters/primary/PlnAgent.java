@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.github.aiconnection.agents.core.MessageType;
 import com.github.aiconnection.agents.core.service.AgentService;
+import com.github.aiconnection.agents.core.service.HistoryService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,12 +26,17 @@ import lombok.extern.slf4j.Slf4j;
 public class PlnAgent extends AbilityBot {
 	
 	private final AgentService agentService;
+	private final HistoryService historyService;
 	
-	public PlnAgent(@Value("${botToken}") final String botToken, @Autowired final AgentService agentService) {
+	public PlnAgent(
+			@Value("${botToken}") final String botToken, 
+			@Autowired final AgentService agentService,
+			@Autowired final HistoryService historyService) {
 		
 		super(botToken, "PlnAgent");
 		
 		this.agentService = agentService;
+		this.historyService = historyService;
 	}
 	
 	public Ability startBot() {
@@ -86,11 +92,15 @@ public class PlnAgent extends AbilityBot {
 		
 		return (ability, update)-> {
 			
-			log.info("m=action, ability: {}, update: {}", ability, update);
-			
-			final MessageType messageType = identifyMessageType(update);
-			
-			messageType.processMessage(agentService, update, sender);
+			try {
+				log.info("m=action, ability: {}, update: {}", ability, update);
+				
+				final MessageType messageType = identifyMessageType(update);
+				
+				messageType.processMessage(agentService, historyService, update, sender);
+			}catch (Exception e) {
+				log.error("m=action, ability: {}, update: {}", ability, update, e);
+			}
 			
 		};
 	}

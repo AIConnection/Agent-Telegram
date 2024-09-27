@@ -21,6 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class BDIService {
+	
+	private static final String PROMPT = "Com base no contexto atual, nos resultados das tarefas de Processamento de Linguagem Natural (PLN) fornecidos em formato JSON [preprocessedStimulus] e na entrada do usuário [userInput], elabore uma lista de 5 instruções sequenciais que o agente deve seguir a partir deste ponto para continuar a interação de maneira eficaz e coerente. As instruções devem considerar os seguintes aspectos:\n"
+			+ "\n"
+			+ "Análise e Interpretação: Como o agente deve interpretar os dados recebidos para entender melhor a necessidade do usuário.\n"
+			+ "Resposta Inicial: Como estruturar a resposta inicial para atender à solicitação do usuário.\n"
+			+ "Verificação de Informações: Quais verificações adicionais o agente deve realizar para garantir a precisão das informações fornecidas.\n"
+			+ "Acompanhamento: Como o agente deve proceder caso o usuário tenha dúvidas adicionais ou deseje continuar a interação.\n"
+			+ "Encerramento: Diretrizes sobre como encerrar a interação de forma satisfatória.";
 
 	private final StateTransitionHandler stateTransitionHandler;
     private final PLNBase plnBase;
@@ -52,6 +60,7 @@ public class BDIService {
      * @return Par com a resposta do agente e um status booleano.
      */
     public String processUserInput(final String userInput) {
+    	
         log.info("m=processUserInput, userInput={}", userInput);
 
         final String preprocessedStimulus = preprocessStimulus(userInput);
@@ -67,16 +76,15 @@ public class BDIService {
 
     private String preprocessStimulus(final String userInput) {
     	
-        final String concatenatedHandles = plnBase
+        return plnBase
                 .handles()
                 .stream()
                 .collect(Collectors.joining());
-
-        return concatenatedHandles;
     }
 
     private String inferPreprocessedStimulus(final String preprocessedStimulus, final String userInput) {
-        return inferUsingLLM(preprocessedStimulus, userInput);
+    	
+        return inferUsingLLM(PROMPT, String.format("preprocessedStimulus: %s\nuserInput: %s", preprocessedStimulus, userInput));
     }
 
 	/**
@@ -86,13 +94,14 @@ public class BDIService {
      */
     @SneakyThrows
     private String perceive(final String preprocessedStimulus, final String userInput) {
-        log.info("m=perceive, preprocessedStimulus={}, userInput={}", preprocessedStimulus, userInput);
+        
+    	log.info("m=perceive, preprocessedStimulus={}, userInput={}", preprocessedStimulus, userInput);
         
         final State nextState = stateTransitionHandler.execute(userInput);
 
-        final String systemPrompt = generateSystemPrompt(nextState);
+        final String fsmPrompt = generateSystemPrompt(nextState);
         
-        return inferUsingLLM(systemPrompt, userInput);
+        return inferUsingLLM(String.format("até o momento o que foi percebido pelo agente:\npreprocessedStimulus: %s\nfsmPrompt: %s\nnextState: %s", preprocessedStimulus, fsmPrompt, nextState), userInput);
     }
 
     /**
@@ -122,6 +131,7 @@ public class BDIService {
      * @return resultado da análise.
      */
     private String analyze(final String perceptionResult, final String userInput) {
+    	
         log.info("m=analyze, perceptionResult={}, userInput={}", perceptionResult, userInput);
 
         final String beliefSummary = generateBeliefSummary();

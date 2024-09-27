@@ -71,6 +71,7 @@ public class IntelligentAgentService implements AgentService{
 		return bdiService.processUserInput(userPrompt);
 	}
 
+	
 	@Override
 	public String complete(final String systemPrompt, final String userPrompt, final List<String> prompts) {
 		

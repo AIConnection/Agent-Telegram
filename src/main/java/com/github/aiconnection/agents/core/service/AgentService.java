@@ -4,18 +4,16 @@ import java.net.URL;
 
 public interface AgentService extends ConversionService, RecognitionService, LLMInference {
 
-	default String processVoice(final URL sourceFile) {
+	default String convertVoiceToText(final URL sourceFile) {
 		
 		final byte[] convertData = convert(sourceFile);
 		
-		final String text = convertVoiceToText(convertData);
-		
-		return complete(text);
+		return convertVoiceToText(convertData);
 	}
-
-	default String processText(final String text) {
+	
+	default String processText(final String history) {
 		
-		return complete(text);
+		return complete(history);
 	}
 	
 	String getBotToken();
