@@ -14,18 +14,18 @@ import lombok.Data;
 @Data
 public class FSM {
 	
-	private final String systemPrompt;
-
+	private final String initialState;
 	private final List<State> states;
 	
 	@JsonIgnore
 	private final Map<String, State> statesMap;
 
 	@JsonCreator
-	public FSM(@JsonProperty("systemPrompt") final String systemPrompt, @JsonProperty("states") final List<State> states) {
+	public FSM(
+			@JsonProperty("initialState") final String initialState,
+			@JsonProperty("states") final List<State> states) {
 		
-		this.systemPrompt = systemPrompt;
-		
+		this.initialState = initialState;
 		this.states = states;
 		
 		this.statesMap = states
@@ -40,7 +40,10 @@ public class FSM {
 
 	public String getSystemPrompt() {
 		
-		return systemPrompt;
+		return states
+				.stream()
+				.map(State::handle)
+				.collect(Collectors.joining());
 	}
 
 	public boolean containsState(final String nextState) {

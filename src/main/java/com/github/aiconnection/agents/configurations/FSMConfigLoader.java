@@ -15,7 +15,7 @@ public class FSMConfigLoader {
 	@Bean
 	public FSM fsm() throws IOException {
         
-		final String filePath = "";
+		final String filePath = "bdi/FSM.json";
 		
 		final ObjectMapper objectMapper = new ObjectMapper();
         final File configFile = new File(filePath);

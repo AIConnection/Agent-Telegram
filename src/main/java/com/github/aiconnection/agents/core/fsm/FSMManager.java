@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.github.aiconnection.agents.core.service.LLMInference;
@@ -14,20 +15,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FSMManager implements StateTransitionHandler{
 
-	private static final String PROMPT_CHECK_CONDITION = "Given the current state: '%s', and the transition condition: '%s', does the user input: '%s' satisfy the transition?";
+	private static final String PROMPT_CHECK_CONDITION = "Dado o estado atual: '%s', e a condição de transição: '%s', a entrada do usuário: '%s' satisfaz a transição?";
 
-	private static final String PROMPT_STATE_ANALYSIS = "Analyzing state transition:\n" +
-		    "User input: '%s'\n" +
-		    "Based on this, determine the next appropriate state.";
+	private static final String PROMPT_STATE_ANALYSIS = "Analisando a transição de estado:\n" +
+		    "Entrada do usuário: '%s'\n" +
+		    "Com base nisso, determine o próximo estado apropriado.";
 	
-	private static final String PROMPT_TRANSITION_STATE = "Given the current state: '%s', the transition condition: '%s', and the user input: '%s', what should be the next state?";
+	private static final String PROMPT_TRANSITION_STATE = "Dado o estado atual: '%s', a condição de transição: '%s', e a entrada do usuário: '%s', qual deve ser o próximo estado?";
 			
 	private final LLMInference llmInference;
 	
 	private final FSM fsm;
 
 	@Autowired
-	public FSMManager(final LLMInference llmInference, final FSM fsm) {
+	public FSMManager(
+			@Qualifier("textLLMInference") final LLMInference llmInference, 
+			final FSM fsm) {
 		
 	        this.fsm = fsm;
 	        this.llmInference = llmInference;
@@ -45,9 +48,9 @@ public class FSMManager implements StateTransitionHandler{
 	         return Optional.of(fsm.get(currentState));
 	     } else {
 	    	 
-	         log.warn("m=perceptiveState, Invalid state received from LLM: {}", currentState);
+	         log.warn("m=perceptiveState, estado inválido inferido na LLM: {}", currentState);
 	         
-	         return Optional.empty();
+	         return Optional.ofNullable(fsm.get(fsm.getInitialState()));
 	     }
 	}
 
@@ -73,7 +76,7 @@ public class FSMManager implements StateTransitionHandler{
 	         return fsm.get(nextState);
 	     } else {
 	    	 
-	         log.warn("m=nextState, Invalid state received from LLM: {}", nextState);
+	         log.warn("m=nextState, estado inválido inferido na LLM: {}", nextState);
 	         
 	         return currentState;
 	     }

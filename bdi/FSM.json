@@ -1,4 +1,5 @@
 {
+  "initialState":"AWAITING_USER_INPUT",
   "states": [
     {
       "name": "AWAITING_USER_INPUT",

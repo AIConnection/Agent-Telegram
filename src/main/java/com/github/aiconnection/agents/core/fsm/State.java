@@ -1,11 +1,11 @@
 package com.github.aiconnection.agents.core.fsm;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
 
 import lombok.Builder;
 import lombok.Data;
@@ -27,16 +27,11 @@ public class State {
   	}
 
     @JsonIgnore
-	public String generateSystemPrompt(final PLNBase plnBase) {
+	public String handle() {
 
-		return plnBase
-        		.handles()
-        		.stream()
-        		.map(handle->String.format(handle, name))
-        		.map(handle->String.format(handle, transitions
-							        				.stream()
-							        				.map(Transition::handle)))
-        		.reduce(String::concat)
-        		.orElseThrow(() -> new RuntimeException("No system prompt available"));
+		return transitions
+				.stream()
+				.map(Transition::handle)
+				.collect(Collectors.joining());
 	}
 }

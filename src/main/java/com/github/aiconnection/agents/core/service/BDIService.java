@@ -1,6 +1,7 @@
 package com.github.aiconnection.agents.core.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,24 +51,42 @@ public class BDIService {
      * @param userInput entrada do usuário.
      * @return Par com a resposta do agente e um status booleano.
      */
-    public String doAction(final String userInput) {
-        log.info("m=doAction, userInput={}", userInput);
+    public String processUserInput(final String userInput) {
+        log.info("m=processUserInput, userInput={}", userInput);
 
-        final String perceptionResult = perceive(userInput);
+        final String preprocessedStimulus = preprocessStimulus(userInput);
         
-        final String analysisResult = analyse(perceptionResult, userInput);
+        final String inferredStimulus = inferPreprocessedStimulus(preprocessedStimulus, userInput);
+        
+        final String perceptionResult = perceive(inferredStimulus, userInput);
+        
+        final String analysisResult = analyze(perceptionResult, userInput);
 
         return deliberate(userInput, analysisResult);
     }
 
-    /**
+    private String preprocessStimulus(final String userInput) {
+    	
+        final String concatenatedHandles = plnBase
+                .handles()
+                .stream()
+                .collect(Collectors.joining());
+
+        return concatenatedHandles;
+    }
+
+    private String inferPreprocessedStimulus(final String preprocessedStimulus, final String userInput) {
+        return inferUsingLLM(preprocessedStimulus, userInput);
+    }
+
+	/**
      * Realiza a percepção da entrada do usuário, integrando com o sistema de PLN.
      * @param userInput entrada do usuário.
      * @return resultado da percepção.
      */
     @SneakyThrows
-    private String perceive(final String userInput) {
-        log.info("m=perceive, userInput={}", userInput);
+    private String perceive(final String preprocessedStimulus, final String userInput) {
+        log.info("m=perceive, preprocessedStimulus={}, userInput={}", preprocessedStimulus, userInput);
         
         final State nextState = stateTransitionHandler.execute(userInput);
 
@@ -82,7 +101,7 @@ public class BDIService {
      */
     private String generateSystemPrompt(final State currentState) {
     	
-    	return currentState.generateSystemPrompt(this.plnBase);
+    	return currentState.handle();
     }
 
     /**
@@ -102,9 +121,8 @@ public class BDIService {
      * @param userInput entrada do usuário.
      * @return resultado da análise.
      */
-    private String analyse(final String perceptionResult, final String userInput) {
-    	
-        log.info("m=analyse, perceptionResult={}, userInput={}", perceptionResult, userInput);
+    private String analyze(final String perceptionResult, final String userInput) {
+        log.info("m=analyze, perceptionResult={}, userInput={}", perceptionResult, userInput);
 
         final String beliefSummary = generateBeliefSummary();
         
@@ -117,21 +135,15 @@ public class BDIService {
      */
     private String generateBeliefSummary() {
    
-        try {
-        	return beliefBase
-            		.getAllBeliefs()
-    				.stream()
-    				.map(belief->">"
-    						.concat(belief.getName())
-    						.concat(":")
-    						.concat(belief.getInitialValue())
-    						.concat("\n"))
-    				.reduce("", String::concat);
-        }catch (final RuntimeException e) {
-			log.error("m=generateBeliefSummary", e);
-			
-			throw e;
-		}
+    	return beliefBase
+        		.getAllBeliefs()
+				.stream()
+				.map(belief->">"
+						.concat(belief.getName())
+						.concat(":")
+						.concat(belief.getInitialValue())
+						.concat("\n"))
+				.reduce("", String::concat);
     }
 
     /**
@@ -142,28 +154,34 @@ public class BDIService {
      * @return narrativa construída de forma significativa.
      */
     private String constructNarrative(final String beliefSummary, final String perceptionResult, final String userInput) {
-    	
-        log.info("m=constructNarrative, userInput={}", userInput);
+        
+    	log.info("m=constructNarrative, userInput={}", userInput);
 
         final String narrative = buildNarrative(beliefSummary, perceptionResult, userInput);
 
-        return textLLMInference.complete("faça uma contrução narrativa.", narrative);
+        return textLLMInference.complete("faça uma construção narrativa.", narrative);
     }
-    
-    
-    public String buildNarrative(final String beliefSummary, final String taskResults, final String userInput) {
-    	
+
+    /**
+     * Monta a estrutura básica da narrativa.
+     * @param beliefSummary sumário das crenças.
+     * @param taskResults resultados das tarefas de PLN.
+     * @param userInput entrada do usuário.
+     * @return estrutura básica da narrativa.
+     */
+    private String buildNarrative(final String beliefSummary, final String taskResults, final String userInput) {
+        
     	return new StringBuilder()
-            	.append("Resumo das Crenças: ")
-            	.append(beliefSummary)
-            	.append("\n")
-            	.append("Resultados das tarefas de PLN:\n")
-            	.append(taskResults)
-            	.append("Entrada do usuário: ")
-            	.append(userInput)
-            	.append("\n")
-            	.append("Com base nisso, o agente está avaliando as próximas ações.\n")
-            	.toString();
+                .append("Resumo das Crenças: ")
+                .append(beliefSummary)
+                .append("\n")
+                .append("Resultados das tarefas de PLN:\n")
+                .append(taskResults)
+                .append("Entrada do usuário: ")
+                .append(userInput)
+                .append("\n")
+                .append("Com base nisso, o agente está avaliando as próximas ações.\n")
+                .toString();
     }
 
     /**
@@ -179,7 +197,7 @@ public class BDIService {
         final List<Desire> applicableDesires = getApplicableDesires();
         final String actions = generatePlanActions(applicableDesires);
 
-        return combineResults(analysisResult, actions, userInput);
+        return compileDeliberationResult(analysisResult, actions, userInput);
     }
 
     /**
@@ -215,14 +233,13 @@ public class BDIService {
     }
 
     /**
-     * Combina os resultados da análise, ações e entrada do usuário.
+     * Compila os resultados da análise, ações e entrada do usuário.
      * @param analysisResult resultado da análise.
      * @param actions ações dos planos.
      * @param userInput entrada do usuário.
-     * @return resultado final combinado.
+     * @return resultado final compilado.
      */
-    private String combineResults(final String analysisResult, final String actions, final String userInput) {
-    	
+    private String compileDeliberationResult(final String analysisResult, final String actions, final String userInput) {
         return textLLMInference.complete(String.join("\n", 
             "Analysis: " + analysisResult, 
             "Actions: " + actions, 

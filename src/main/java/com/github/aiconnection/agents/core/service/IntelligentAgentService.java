@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.github.aiconnection.agents.core.fsm.State;
 import com.github.aiconnection.agents.core.fsm.StateTransitionHandler;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +68,7 @@ public class IntelligentAgentService implements AgentService{
 		
 		log.info("m=complete, userPrompt={}", userPrompt);
 		
-		return bdiService.doAction(userPrompt);
+		return bdiService.processUserInput(userPrompt);
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class IntelligentAgentService implements AgentService{
 		
 		final StringBuilder builder = new StringBuilder();
 		
-		prompts.forEach(prompt -> builder.append(bdiService.doAction(prompt)));
+		prompts.forEach(prompt -> builder.append(bdiService.processUserInput(prompt)));
 		
 		return llmInference.complete(systemPrompt, userPrompt, prompts);
 	}
@@ -89,7 +88,7 @@ public class IntelligentAgentService implements AgentService{
 		
 		log.info("m=complete, systemPrompt={}, prompt={}", systemPrompt, prompt);
 		
-		final String result = bdiService.doAction(prompt);
+		final String result = bdiService.processUserInput(prompt);
 		
 		return llmInference.complete(systemPrompt, result);
 	}
