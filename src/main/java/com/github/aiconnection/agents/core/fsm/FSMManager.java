@@ -50,7 +50,7 @@ public class FSMManager implements StateTransitionHandler{
 	    	 
 	         log.warn("m=perceptiveState, estado inválido inferido na LLM: {}", currentState);
 	         
-	         return Optional.ofNullable(fsm.get(fsm.getInitialState()));
+	         return Optional.of(fsm.getInitialState());
 	     }
 	}
 

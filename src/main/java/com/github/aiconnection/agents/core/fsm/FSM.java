@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class FSM {
 	
-	private final String initialState;
+	private final State initialState;
 	private final List<State> states;
 	
 	@JsonIgnore
@@ -25,12 +25,13 @@ public class FSM {
 			@JsonProperty("initialState") final String initialState,
 			@JsonProperty("states") final List<State> states) {
 		
-		this.initialState = initialState;
 		this.states = states;
 		
 		this.statesMap = states
 				.stream()
                 .collect(Collectors.toMap(State::getName, Function.identity()));
+		
+		this.initialState = this.statesMap.get(initialState);
 	}
 
 	public State get(final String target) {
