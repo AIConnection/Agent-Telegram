@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service("intelligentAgentService")
 @Slf4j
 public class IntelligentAgentService implements AgentService{
+	
+	private static final String MODERATION = 
+			"""
+			verifique se a entrada do usuário condiz com o contexto e pode ser respondida.
+			responda apenas:
+			true -> caso sim, está dentro do contexto
+			false -> caso não, a solicitação trata outro assunto e diverge do contexto.
+			""";
 	
 	private static final String RESUME =
 			"""
@@ -107,5 +116,16 @@ public class IntelligentAgentService implements AgentService{
 	public String resume(final String text) {
 		
 		return llmInference.complete(RESUME, text);
+	}
+
+	@Override
+	public boolean moderation(final String userInput) {
+		
+		return BooleanUtils.toBoolean(llmInference.complete(MODERATION, String.format("Context:%s%suserInput:%s", bdiService.getContextDescription(),"\n", userInput)));
+	}
+
+	@Override
+	public String getModeratedContent() {
+		return " Parece que sua mensagem não está relacionada com o tipo de serviço que eu ofereço.";
 	}
 }

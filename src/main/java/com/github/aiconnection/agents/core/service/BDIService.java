@@ -270,4 +270,9 @@ public class BDIService {
         		.findFirst()
         		.orElseThrow(() -> new RuntimeException("Desire not found for ID: " + desireId));
     }
+
+	public String getContextDescription() {
+		
+		return String.format("BeliefSummary: %s%sApplicableDesires:%s", generateBeliefSummary(), "\n", getApplicableDesires());
+	}
 }
