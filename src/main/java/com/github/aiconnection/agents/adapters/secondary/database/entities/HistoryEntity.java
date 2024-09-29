@@ -3,10 +3,10 @@ package com.github.aiconnection.agents.adapters.secondary.database.entities;
 import java.io.Serializable;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,9 +23,8 @@ public class HistoryEntity implements Serializable {
 	private static final long serialVersionUID = 8430857046738628925L;
 
 	@Id
-	private String uid;
+	private Long uid;
 	
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinColumn(name = "uid")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private List<HistoryEntryEntity> historyEntryEntities;
 }

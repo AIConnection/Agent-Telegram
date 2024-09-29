@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.github.aiconnection.agents.adapters.secondary.database.entities.HistoryEntity;
 
 @Repository
-public interface HistoryEntityJpaRepository extends JpaRepository<HistoryEntity, String>{
+public interface HistoryEntityJpaRepository extends JpaRepository<HistoryEntity, Long>{
 
 }

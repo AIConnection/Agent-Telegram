@@ -25,17 +25,54 @@ public enum MessageType {
 				final Update update,
 				final MessageSender sender) {
 			
-			log.info("m=processMessage msg='MessageType.TEXT activate service, send TEXT'");
-			
 			final Long chatId = update.getMessage().getChatId();
 			
 			final String userInput = update.getMessage().getText();
 			
-			final String currentHistory = MessageType.getCurrentHistory(historyService, chatId);
 			
-			final String text = agentService.processText(String.format("%s\n%s", currentHistory, userInput));
-			
-			responseMessage(chatId, text, sender);
+			log.info("m=processMessage, chatId={}, userInput={},  msg='MessageType.TEXT activate service, send TEXT'", chatId, userInput);
+
+			try {
+				
+				final String currentHistory = MessageType.getCurrentHistory(historyService, chatId);
+				
+				if(currentHistory != null && !"".equals(currentHistory)) {
+					
+					final String resumeCurrentHistory = agentService.resume(currentHistory);
+					
+					log.debug("m=processMessage, userInput={}, resumeCurrentHistory={}", userInput, resumeCurrentHistory);
+					
+					final String text = agentService.processText(String.format("resumeCurrentHistory:%s%suserInput:%s", resumeCurrentHistory, "\n", userInput));
+					
+					log.debug("m=processMessage, userInput={}, text={}", userInput, text);
+					
+					responseMessage(chatId, text, sender);
+					
+					final String resume = agentService.resume(text);
+					
+					MessageType.addHistory(historyService, chatId, userInput, resume);
+					
+				}else {
+					
+					log.debug("m=processMessage, userInput={}", userInput);
+					
+					final String text = agentService.processText(String.format("userInput:%s", userInput));
+					
+					log.debug("m=processMessage, userInput={}, text={}", userInput, text);
+					
+					responseMessage(chatId, text, sender);
+					
+					final String resume = agentService.resume(text);
+					
+					MessageType.addHistory(historyService, chatId, userInput, resume);
+				}
+
+			}catch (Exception e) {
+				
+				log.error("m=processMessage, update: {}", update, e);
+				
+				responseMessage(chatId, "teste novamente mais tarde.", sender);
+			}
 		}
 	},
 	VOICE {
@@ -125,12 +162,12 @@ public enum MessageType {
 	protected static void addHistory(final HistoryService historyService, final Long chatId, final String userInput,
 			final String text) {
 		
-		historyService.addHistory(String.valueOf(chatId), String.format("%s\n%s", userInput, text));
+		historyService.addHistory(chatId, String.format("{\"chatId\":\"%s\"\"userInput\":\"%s\",\"llmResponse\":\"%s\"}", chatId, userInput, text));
 	}
 
 	protected static String getCurrentHistory(final HistoryService historyService, final Long chatId) {
 		
-		return historyService.getHistory(String.valueOf(chatId));
+		return historyService.getHistory(chatId);
 	}
 }
 

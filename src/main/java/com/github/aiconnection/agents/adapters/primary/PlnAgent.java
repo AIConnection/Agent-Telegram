@@ -92,16 +92,11 @@ public class PlnAgent extends AbilityBot {
 		
 		return (ability, update)-> {
 			
-			try {
-				log.info("m=action, ability: {}, update: {}", ability, update);
-				
-				final MessageType messageType = identifyMessageType(update);
-				
-				messageType.processMessage(agentService, historyService, update, sender);
-			}catch (Exception e) {
-				log.error("m=action, ability: {}, update: {}", ability, update, e);
-			}
+			log.info("m=action, ability: {}, update: {}", ability, update);
 			
+			final MessageType messageType = identifyMessageType(update);
+			
+			messageType.processMessage(agentService, historyService, update, sender);
 		};
 	}
 

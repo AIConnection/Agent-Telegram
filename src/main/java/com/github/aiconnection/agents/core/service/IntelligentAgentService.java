@@ -8,14 +8,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.github.aiconnection.agents.core.fsm.StateTransitionHandler;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service("intelligentAgentService")
 @Slf4j
 public class IntelligentAgentService implements AgentService{
 	
+	private static final String RESUME =
+			"""
+			Extraia os principais tópicos e suas paravras chaves (PLN).
+			Por exemplo:
+			-tópico a
+			    {entidades nomeadas}, {relacionamento das entedades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+			-tópico b
+			    {entidades nomeadas}, {relacionamento das entedades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+			    
+			Responda em formato de lista com os 3 tópicos mais relevantes e suas paravras chaves conforme exemplo.
+			""";
+
 	private final LLMInference llmInference;
 	
 	private final RecognitionService recognition;
@@ -28,7 +38,6 @@ public class IntelligentAgentService implements AgentService{
 
 	public IntelligentAgentService(
 			@Value("${botToken}") final String botToken,
-			@Autowired final StateTransitionHandler stateTransitionHandler,
 			@Autowired final LLMInference llmInference,
 			@Autowired final RecognitionService recognition,
 			@Autowired final ConversionService conversion,
@@ -92,5 +101,11 @@ public class IntelligentAgentService implements AgentService{
 		final String result = bdiService.processUserInput(prompt);
 		
 		return llmInference.complete(systemPrompt, result);
+	}
+
+	@Override
+	public String resume(final String text) {
+		
+		return llmInference.complete(RESUME, text);
 	}
 }

@@ -17,4 +17,6 @@ public interface AgentService extends ConversionService, RecognitionService, LLM
 	}
 	
 	String getBotToken();
+
+	String resume(final String text);
 }

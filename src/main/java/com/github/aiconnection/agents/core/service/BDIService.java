@@ -21,14 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class BDIService {
-	
-	private static final String PROMPT = "Com base no contexto atual, nos resultados das tarefas de Processamento de Linguagem Natural (PLN) fornecidos em formato JSON [preprocessedStimulus] e na entrada do usuário [userInput], elabore uma lista de 5 instruções sequenciais que o agente deve seguir a partir deste ponto para continuar a interação de maneira eficaz e coerente. As instruções devem considerar os seguintes aspectos:\n"
-			+ "\n"
-			+ "Análise e Interpretação: Como o agente deve interpretar os dados recebidos para entender melhor a necessidade do usuário.\n"
-			+ "Resposta Inicial: Como estruturar a resposta inicial para atender à solicitação do usuário.\n"
-			+ "Verificação de Informações: Quais verificações adicionais o agente deve realizar para garantir a precisão das informações fornecidas.\n"
-			+ "Acompanhamento: Como o agente deve proceder caso o usuário tenha dúvidas adicionais ou deseje continuar a interação.\n"
-			+ "Encerramento: Diretrizes sobre como encerrar a interação de forma satisfatória.";
 
 	private final StateTransitionHandler stateTransitionHandler;
     private final PLNBase plnBase;
@@ -63,19 +55,21 @@ public class BDIService {
     	
         log.info("m=processUserInput, userInput={}", userInput);
 
-        final String preprocessedStimulus = preprocessStimulus(userInput);
+        final String preprocessedStimulus = preprocessStimulus();
         
         final String inferredStimulus = inferPreprocessedStimulus(preprocessedStimulus, userInput);
         
         final String perceptionResult = perceive(inferredStimulus, userInput);
         
         final String analysisResult = analyze(perceptionResult, userInput);
+        
+        final String delibarate = deliberate(userInput, analysisResult);
 
-        return deliberate(userInput, analysisResult);
+        return responseFormulate(userInput, delibarate);
     }
 
-    private String preprocessStimulus(final String userInput) {
-    	
+	private String preprocessStimulus() {
+
         return plnBase
                 .handles()
                 .stream()
@@ -84,7 +78,7 @@ public class BDIService {
 
     private String inferPreprocessedStimulus(final String preprocessedStimulus, final String userInput) {
     	
-        return inferUsingLLM(PROMPT, String.format("preprocessedStimulus: %s\nuserInput: %s", preprocessedStimulus, userInput));
+        return inferUsingLLM(preprocessedStimulus, userInput);
     }
 
 	/**
@@ -209,6 +203,11 @@ public class BDIService {
 
         return compileDeliberationResult(analysisResult, actions, userInput);
     }
+    
+    private String responseFormulate(final String userInput, final String delibarate) {
+    	
+		return textLLMInference.complete(String.format("um agente deliberou [delibarate] sobre os dados de entrada do usuário [userInput], formate de forma adequada para responder ao usuário, responda apenas o que deve ser enviado para o usuário. %suserInput:%s%sdelibarate:%s", "\n", userInput, "\n", delibarate));
+	}
 
     /**
      * Obtém os desejos aplicáveis com base nas crenças do agente.
@@ -250,6 +249,7 @@ public class BDIService {
      * @return resultado final compilado.
      */
     private String compileDeliberationResult(final String analysisResult, final String actions, final String userInput) {
+    	
         return textLLMInference.complete(String.join("\n", 
             "Analysis: " + analysisResult, 
             "Actions: " + actions, 
