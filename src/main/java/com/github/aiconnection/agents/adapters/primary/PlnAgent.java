@@ -104,10 +104,11 @@ public class PlnAgent extends AbilityBot {
 		
 		if(update != null && update.getMessage() != null) {
 			
-			final boolean text = update.getMessage().getText() != null && !"".equalsIgnoreCase(update.getMessage().getText().trim());
+			final boolean hasText = update.getMessage().getText() != null && !"".equalsIgnoreCase(update.getMessage().getText().trim()) && !update.getMessage().getText().substring(0, 1).equals("/");
 			final boolean hasVoice = update.getMessage().getVoice() != null;
+			final boolean hasCommand = update.getMessage().getText() != null && !"".equalsIgnoreCase(update.getMessage().getText().trim()) && update.getMessage().getText().substring(0, 1).equals("/");
 			
-			return MessageType.getMessageType(text, hasVoice);
+			return MessageType.getMessageType(hasText, hasVoice, hasCommand);
 		}
 		
 		return MessageType.NONE;

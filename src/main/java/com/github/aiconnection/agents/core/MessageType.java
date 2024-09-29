@@ -29,7 +29,6 @@ public enum MessageType {
 			
 			final String userInput = update.getMessage().getText();
 			
-			
 			log.info("m=processMessage, chatId={}, userInput={},  msg='MessageType.TEXT activate service, send TEXT'", chatId, userInput);
 
 			try {
@@ -115,6 +114,25 @@ public enum MessageType {
 			MessageType.VOICE.processMessage(agentService, historyService, update, sender); 
 		}
 	},
+	COMMAND {
+
+		@Override
+		public void processMessage(final AgentService agentService, final HistoryService historyService, final Update update,
+				final MessageSender sender) {
+			
+			final Long chatId = update.getMessage().getChatId();
+			
+			final String userInput = update.getMessage().getText();
+			
+			if("/reset".equalsIgnoreCase(userInput.trim())) {
+				historyService.clean(chatId);
+			}else if("/debug".equalsIgnoreCase(userInput.trim())) {
+				
+				// TODO: implement explainability mechanism. The idea is to generate a response with a step-by-step guide to what the agent is doing..
+				log.info("implementar explicabilidade.");
+			}
+		}
+	},
 	NONE {
 		@Override
 		public void processMessage(
@@ -135,7 +153,7 @@ public enum MessageType {
 		sender.execute(sendMessage); 
 	}
 
-	public static MessageType getMessageType(boolean hasText, boolean hasVoice) {
+	public static MessageType getMessageType(boolean hasText, boolean hasVoice, boolean hasCommand) {
 
 		if (hasText && hasVoice) {
 
@@ -148,6 +166,9 @@ public enum MessageType {
 		} else if (hasVoice) {
 
 			return VOICE;
+			
+		}else if (hasCommand) {
+			
 		}
 
 		return NONE;
