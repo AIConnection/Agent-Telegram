@@ -14,7 +14,7 @@ import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 
-@Component
+@Component("audioConversion")
 public class AudioConversion implements ConversionService {
 
 	@Override

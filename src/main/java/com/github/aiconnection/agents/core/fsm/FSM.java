@@ -2,6 +2,7 @@ package com.github.aiconnection.agents.core.fsm;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,14 +30,14 @@ public class FSM {
 		
 		this.statesMap = states
 				.stream()
-                .collect(Collectors.toMap(State::getName, Function.identity()));
+                .collect(Collectors.toMap(State::name, Function.identity()));
 		
 		this.initialState = this.statesMap.get(initialState);
 	}
 
-	public State get(final String target) {
+	public Optional<State> get(final String target) {
 		
-		return this.statesMap.get(target);
+		return Optional.ofNullable(this.statesMap.get(target));
 	}
 
 	public String getSystemPrompt() {

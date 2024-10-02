@@ -1,10 +1,12 @@
 package com.github.aiconnection.agents.core.service;
 
+import java.util.Optional;
+
 public interface HistoryService {
 
-	void addHistory(final Long uid, final String history);
+	Optional<String> getCurrent(final Long uid);
 
-	String getHistory(final Long uid);
+	void add(final Long uid, final String history, Object ...opts);
 
 	void clean(final Long uid);
 }

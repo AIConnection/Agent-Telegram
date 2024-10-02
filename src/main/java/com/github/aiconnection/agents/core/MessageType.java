@@ -1,7 +1,9 @@
 package com.github.aiconnection.agents.core;
 
-import java.net.URL;
-
+import com.github.aiconnection.agents.core.service.AgentService;
+import com.github.aiconnection.agents.core.service.HistoryService;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.abilitybots.api.sender.MessageSender;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -9,180 +11,155 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.Voice;
 
-import com.github.aiconnection.agents.core.service.AgentService;
-import com.github.aiconnection.agents.core.service.HistoryService;
-
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URL;
 
 @Slf4j
 public enum MessageType {
-	TEXT {
-		@Override
-		public void processMessage(final AgentService agentService, final HistoryService historyService,
-				final Update update, final MessageSender sender) {
+    TEXT {
+        @Override
+        public void processMessage(final AgentService agentService, final HistoryService historyService,
+                                   final Update update, final MessageSender sender) {
 
-			final Long chatId = update.getMessage().getChatId();
+            final Long chatId = update.getMessage().getChatId();
 
-			final String userInput = update.getMessage().getText();
+            final String userInput = update.getMessage().getText();
 
-			log.info("m=processMessage, chatId={}, userInput={},  msg='MessageType.TEXT activate service, send TEXT'",
-					chatId, userInput);
+            log.info("m=processMessage, chatId={}, userInput={},  msg='MessageType.TEXT activate service, send TEXT'",
+                    chatId, userInput);
 
-			try {
-				
-				if(!agentService.moderation(userInput)) {
-					responseMessage(chatId, agentService.getModeratedContent(), sender);
-					return;
-				}
+            try {
 
-				final String currentHistory = MessageType.getCurrentHistory(historyService, chatId);
+                if (!agentService.moderation(userInput)) {
+                    responseMessage(chatId, agentService.getModeratedContent(), sender);
+                    return;
+                }
 
-				if (currentHistory != null && !"".equals(currentHistory)) {
+                String text = historyService.getCurrent(chatId)
+                        .map(currentHistory -> {
 
-					final String resumeCurrentHistory = agentService.resume(currentHistory);
+                            final String resumeCurrentHistory = agentService.resume(currentHistory);
 
-					log.debug("m=processMessage, userInput={}, resumeCurrentHistory={}", userInput,
-							resumeCurrentHistory);
+                            log.debug("m=processMessage, userInput={}, resumeCurrentHistory={}", userInput,
+                                    resumeCurrentHistory);
 
-					final String text = agentService.processText(String.format("resumeCurrentHistory:%s%suserInput:%s",
-							resumeCurrentHistory, "\n", userInput));
+                            return agentService.processText(String.format("resumeCurrentHistory:%s%suserInput:%s",
+                                    resumeCurrentHistory, "\n", userInput));
+                        })
+                        .orElseGet(() -> {
 
-					log.debug("m=processMessage, userInput={}, text={}", userInput, text);
+                            log.debug("m=processMessage, userInput={}", userInput);
 
-					responseMessage(chatId, text, sender);
+                            return agentService.processText(String.format("userInput:%s", userInput));
+                        });
 
-					final String resume = agentService.resume(text);
+                log.debug("m=processMessage, userInput={}, text={}", userInput, text);
 
-					MessageType.addHistory(historyService, chatId, userInput, resume);
+                responseMessage(chatId, text, sender);
 
-				} else {
+                final String resume = agentService.resume(text);
 
-					log.debug("m=processMessage, userInput={}", userInput);
+                historyService.add(chatId, "{\"chatId\":\"%s\"\"userInput\":\"%s\",\"llmResponse\":\"%s\"}",
+                        chatId, userInput, resume);
+            } catch (Exception e) {
 
-					final String text = agentService.processText(String.format("userInput:%s", userInput));
+                log.error("m=processMessage, update: {}", update, e);
 
-					log.debug("m=processMessage, userInput={}, text={}", userInput, text);
+                responseMessage(chatId, "teste novamente mais tarde.", sender);
+            }
+        }
+    },
+    VOICE {
+        @Override
+        @SneakyThrows
+        public void processMessage(final AgentService agentService, final HistoryService historyService,
+                                   final Update update, final MessageSender sender) {
 
-					responseMessage(chatId, text, sender);
+            log.info("m=processMessage msg='MessageType.VOICE activate service, send VOICE'");
 
-					final String resume = agentService.resume(text);
+            final Long chatId = update.getMessage().getChatId();
 
-					MessageType.addHistory(historyService, chatId, userInput, resume);
-				}
+            final Voice voice = update.getMessage().getVoice();
 
-			} catch (Exception e) {
+            final File file = sender.execute(new GetFile(voice.getFileId()));
 
-				log.error("m=processMessage, update: {}", update, e);
+            final String fileUrl = file.getFileUrl(agentService.getBotToken());
 
-				responseMessage(chatId, "teste novamente mais tarde.", sender);
-			}
-		}
-	},
-	VOICE {
-		@Override
-		@SneakyThrows
-		public void processMessage(final AgentService agentService, final HistoryService historyService,
-				final Update update, final MessageSender sender) {
+            final String userInput = agentService.convertVoiceToText(new URL(fileUrl));
 
-			log.info("m=processMessage msg='MessageType.VOICE activate service, send VOICE'");
+            final String text = agentService.processText(userInput);
 
-			final Long chatId = update.getMessage().getChatId();
+            responseMessage(chatId, text, sender);
+        }
+    },
+    TEXT_AND_VOICE {
+        @Override
+        public void processMessage(final AgentService agentService, final HistoryService historyService,
+                                   final Update update, final MessageSender sender) {
 
-			final Voice voice = update.getMessage().getVoice();
+            log.info("m=processMessage msg='MessageType.TEXT_AND_VOICE activate service, send TEXT AND VOICE'");
 
-			final File file = sender.execute(new GetFile(voice.getFileId()));
+            MessageType.TEXT.processMessage(agentService, historyService, update, sender);
+            MessageType.VOICE.processMessage(agentService, historyService, update, sender);
+        }
+    },
+    COMMAND {
+        @Override
+        public void processMessage(final AgentService agentService, final HistoryService historyService,
+                                   final Update update, final MessageSender sender) {
 
-			final String fileUrl = file.getFileUrl(agentService.getBotToken());
+            final Long chatId = update.getMessage().getChatId();
 
-			final String userInput = agentService.convertVoiceToText(new URL(fileUrl));
+            final String userInput = update.getMessage().getText();
 
-			final String text = agentService.processText(userInput);
+            if ("/reset".equalsIgnoreCase(userInput.trim())) {
+                historyService.clean(chatId);
+            } else if ("/debug".equalsIgnoreCase(userInput.trim())) {
 
-			responseMessage(chatId, text, sender);
-		}
-	},
-	TEXT_AND_VOICE {
-		@Override
-		public void processMessage(final AgentService agentService, final HistoryService historyService,
-				final Update update, final MessageSender sender) {
+                // TODO: implement explainability mechanism. The idea is to generate a response
+                // with a step-by-step guide to what the agent is doing..
+                log.info("implementar explicabilidade.");
+            }
+        }
+    },
+    NONE {
+        @Override
+        public void processMessage(final AgentService agentService, final HistoryService historyService,
+                                   final Update update, final MessageSender sender) {
 
-			log.info("m=processMessage msg='MessageType.TEXT_AND_VOICE activate service, send TEXT AND VOICE'");
+            log.info("m=processMessage msg='MessageType.NONE activate service, not implementation.'");
+        }
+    };
 
-			MessageType.TEXT.processMessage(agentService, historyService, update, sender);
-			MessageType.VOICE.processMessage(agentService, historyService, update, sender);
-		}
-	},
-	COMMAND {
+    @SneakyThrows
+    public static void responseMessage(final Long chatId, final String text, final MessageSender sender) {
 
-		@Override
-		public void processMessage(final AgentService agentService, final HistoryService historyService,
-				final Update update, final MessageSender sender) {
+        final SendMessage sendMessage = new SendMessage(String.valueOf(chatId), text);
 
-			final Long chatId = update.getMessage().getChatId();
+        sender.execute(sendMessage);
+    }
 
-			final String userInput = update.getMessage().getText();
+    public static MessageType getMessageType(boolean hasText, boolean hasVoice, boolean hasCommand) {
 
-			if ("/reset".equalsIgnoreCase(userInput.trim())) {
-				historyService.clean(chatId);
-			} else if ("/debug".equalsIgnoreCase(userInput.trim())) {
+        if (hasText && hasVoice) {
 
-				// TODO: implement explainability mechanism. The idea is to generate a response
-				// with a step-by-step guide to what the agent is doing..
-				log.info("implementar explicabilidade.");
-			}
-		}
-	},
-	NONE {
-		@Override
-		public void processMessage(final AgentService agentService, final HistoryService historyService,
-				final Update update, final MessageSender sender) {
+            return TEXT_AND_VOICE;
 
-			log.info("m=processMessage msg='MessageType.NONE activate service, not implementation.'");
-		}
-	};
+        } else if (hasText) {
 
-	@SneakyThrows
-	public static void responseMessage(final Long chatId, final String text, final MessageSender sender) {
+            return TEXT;
 
-		final SendMessage sendMessage = new SendMessage(String.valueOf(chatId), text);
+        } else if (hasVoice) {
 
-		sender.execute(sendMessage);
-	}
+            return VOICE;
 
-	public static MessageType getMessageType(boolean hasText, boolean hasVoice, boolean hasCommand) {
+        } else if (hasCommand) {
+            return COMMAND;
+        }
 
-		if (hasText && hasVoice) {
+        return NONE;
+    }
 
-			return TEXT_AND_VOICE;
+    public abstract void processMessage(final AgentService agentService, final HistoryService historyService,
+                                        final Update update, final MessageSender sender);
 
-		} else if (hasText) {
-
-			return TEXT;
-
-		} else if (hasVoice) {
-
-			return VOICE;
-
-		} else if (hasCommand) {
-
-		}
-
-		return NONE;
-	}
-
-	public abstract void processMessage(final AgentService agentService, final HistoryService historyService,
-			final Update update, final MessageSender sender);
-
-	protected static void addHistory(final HistoryService historyService, final Long chatId, final String userInput,
-			final String text) {
-
-		historyService.addHistory(chatId, String
-				.format("{\"chatId\":\"%s\"\"userInput\":\"%s\",\"llmResponse\":\"%s\"}", chatId, userInput, text));
-	}
-
-	protected static String getCurrentHistory(final HistoryService historyService, final Long chatId) {
-
-		return historyService.getHistory(chatId);
-	}
 }

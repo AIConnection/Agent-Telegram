@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.aiconnection.agents.core.service.RecognitionService;
 
-@Component
+@Component("voiceRecognition")
 public class VoiceRecognition implements RecognitionService {
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/audio/transcriptions";

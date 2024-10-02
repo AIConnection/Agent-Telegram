@@ -13,7 +13,7 @@ import com.github.aiconnection.agents.core.bdi.DesireBase;
 import com.github.aiconnection.agents.core.bdi.Plans;
 import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
 import com.github.aiconnection.agents.core.fsm.State;
-import com.github.aiconnection.agents.core.fsm.StateTransitionHandler;
+import com.github.aiconnection.agents.core.fsm.TransitionHandler;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BDIService {
 
-	private final StateTransitionHandler stateTransitionHandler;
+	private final TransitionHandler transitionHandler;
     private final PLNBase plnBase;
     private final BeliefBase beliefBase;
     private final DesireBase desireBase;
@@ -31,14 +31,14 @@ public class BDIService {
 
     @Autowired
     public BDIService(
-    		final StateTransitionHandler stateTransitionHandler,
+    		final TransitionHandler transitionHandler,
             final PLNBase plnBase,
             final BeliefBase beliefBase, 
             final DesireBase desireBase, 
             final Plans plans,
             final TextLLMInference textLLMInference) {
     	
-    	this.stateTransitionHandler = stateTransitionHandler;
+    	this.transitionHandler = transitionHandler;
         this.plnBase = plnBase;
         this.beliefBase = beliefBase;
         this.desireBase = desireBase;
@@ -91,7 +91,7 @@ public class BDIService {
         
     	log.info("m=perceive, preprocessedStimulus={}, userInput={}", preprocessedStimulus, userInput);
         
-        final State nextState = stateTransitionHandler.execute(userInput);
+        final State nextState = transitionHandler.execute(userInput);
 
         final String fsmPrompt = generateSystemPrompt(nextState);
         

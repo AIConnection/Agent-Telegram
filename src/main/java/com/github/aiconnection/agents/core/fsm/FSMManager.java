@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class FSMManager implements StateTransitionHandler{
+public class FSMManager implements TransitionHandler {
 
 	private static final String PROMPT_CHECK_CONDITION = "Dado o estado atual: '%s', e a condição de transição: '%s', a entrada do usuário: '%s' satisfaz a transição?";
 
@@ -45,12 +45,12 @@ public class FSMManager implements StateTransitionHandler{
 		
 		if (fsm.containsState(currentState)) {
 	    	 
-	         return Optional.of(fsm.get(currentState));
+	         return fsm.get(currentState);
 	     } else {
 	    	 
 	         log.warn("m=perceptiveState, estado inválido inferido na LLM: {}", currentState);
 	         
-	         return Optional.of(fsm.getInitialState());
+	         return Optional.ofNullable(fsm.getInitialState());
 	     }
 	}
 
@@ -65,7 +65,7 @@ public class FSMManager implements StateTransitionHandler{
 	}
 
 	@Override
-	public State nextState(final Transition transition, final State currentState, final String userInput) {
+	public Optional<State> nextState(final Transition transition, final State currentState, final String userInput) {
 		
 		final String prompt = preparePromptForTransitionState(transition, currentState, userInput);
 	     
@@ -78,7 +78,7 @@ public class FSMManager implements StateTransitionHandler{
 	    	 
 	         log.warn("m=nextState, estado inválido inferido na LLM: {}", nextState);
 	         
-	         return currentState;
+	         return Optional.ofNullable(currentState);
 	     }
 	 }
 	
@@ -86,8 +86,8 @@ public class FSMManager implements StateTransitionHandler{
 		
 	    return String.format(
 	        PROMPT_CHECK_CONDITION,
-	        currentState.getName(), 
-	        transition.getCondition(), 
+	        currentState.name(),
+	        transition.condition(),
 	        userInput
 	    );
 	}
@@ -104,8 +104,8 @@ public class FSMManager implements StateTransitionHandler{
 	    
 	    return String.format(
 	    		PROMPT_TRANSITION_STATE,
-		        currentState.getName(), 
-		        transition.getCondition(), 
+		        currentState.name(),
+		        transition.condition(),
 		        userInput
 		    );
 	}

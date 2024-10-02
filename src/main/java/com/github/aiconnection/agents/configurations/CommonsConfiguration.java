@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
-public class CommunsConfiguration {
+public class CommonsConfiguration {
 
 	@Bean
 	public ObjectMapper objectMapper() {

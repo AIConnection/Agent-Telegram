@@ -20,8 +20,8 @@ import com.github.aiconnection.agents.core.service.PromptGeneratorService;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Component("textLLMInference")
 @Slf4j
+@Component("textLLMInference")
 public class TextLLMInference implements LLMInference, PLNService, PromptGeneratorService {
 
 	private final OpenAiChatModel openAiChatModel;

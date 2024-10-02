@@ -1,19 +1,21 @@
-package com.github.aiconnection.agents.core.service;
+package com.github.aiconnection.agents.core.service.impl;
 
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.aiconnection.agents.core.service.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Service("intelligentAgentService")
 @Slf4j
-public class IntelligentAgentService implements AgentService{
+@Service("intelligentAgentService")
+public class IntelligentAgentService implements AgentService {
 	
 	private static final String MODERATION = 
 			"""
@@ -25,14 +27,14 @@ public class IntelligentAgentService implements AgentService{
 	
 	private static final String RESUME =
 			"""
-			Extraia os principais tópicos e suas paravras chaves (PLN).
+			Extraia os principais tópicos e suas palavras chaves (PLN).
 			Por exemplo:
 			-tópico a
-			    {entidades nomeadas}, {relacionamento das entedades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+			    {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
 			-tópico b
-			    {entidades nomeadas}, {relacionamento das entedades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+			    {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
 			    
-			Responda em formato de lista com os 3 tópicos mais relevantes e suas paravras chaves conforme exemplo.
+			Responda em formato de lista com os 3 tópicos mais relevantes e suas palavras chaves conforme exemplo.
 			""";
 
 	private final LLMInference llmInference;
@@ -47,16 +49,17 @@ public class IntelligentAgentService implements AgentService{
 
 	public IntelligentAgentService(
 			@Value("${botToken}") final String botToken,
-			@Autowired final LLMInference llmInference,
-			@Autowired final RecognitionService recognition,
-			@Autowired final ConversionService conversion,
-			@Autowired final BDIService bdiService) {
+			@Autowired final BDIService bdiService,
+			@Autowired @Qualifier("voiceRecognition") final RecognitionService recognition,
+			@Autowired @Qualifier("audioConversion") final ConversionService conversion,
+			@Autowired @Qualifier("textLLMInference") final LLMInference llmInference
+			) {
 		
 		this.botToken = botToken;
-		this.llmInference = llmInference;
+		this.bdiService = bdiService;
 		this.recognition = recognition;
 		this.conversion = conversion;
-		this.bdiService = bdiService;
+		this.llmInference = llmInference;
 	}
 	
 	@Override
