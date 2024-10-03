@@ -33,9 +33,9 @@ public class TextLLMInference implements LLMInference, PLNService, PromptGenerat
 	
 	public String complete(final Prompt prompt) {
 		
-		final ChatResponse chatResonse = openAiChatModel.call(prompt);
+		final ChatResponse chatResponse = openAiChatModel.call(prompt);
 		
-		return chatResonse
+		return chatResponse
 				.getResult()
 				.getOutput()
 				.getContent();
