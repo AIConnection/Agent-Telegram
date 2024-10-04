@@ -21,19 +21,19 @@ import java.util.List;
 
 @Service("telegramAgent")
 public class TelegramAgent implements AgentService {
-    private final String botToken;
+    private final String telegramToken;
     private final BDIAgent agent;
     private final MediaTranscription<ByteBuffer> audioToMp3;
     private final MediaTranscription<String> mp3ToText;
 
     @Autowired
     public TelegramAgent(
-            @Value("${botToken}") final String botToken,
+            @Value("${botToken}") final String telegramToken,
             @Qualifier("jsonBDI") final BDIRepo repo,
             @Qualifier("openAI") LLMInference inference,
             @Qualifier("audioConversion") MediaTranscription<ByteBuffer> audioToMp3,
             @Qualifier("voiceRecognition") MediaTranscription<String> mp3ToText) {
-        this.botToken = botToken;
+        this.telegramToken = telegramToken;
         this.audioToMp3 = audioToMp3;
         this.mp3ToText = mp3ToText;
         this.agent = new BDIAgent(new BDICtx(repo, inference));
@@ -41,7 +41,7 @@ public class TelegramAgent implements AgentService {
 
     @Override
     public String getBotToken() {
-        return this.botToken;
+        return this.telegramToken;
     }
 
     @Override
