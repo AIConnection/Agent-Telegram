@@ -2,9 +2,14 @@ package com.github.aiconnection.agents.adapters.secondary.recognition;
 
 import java.util.Optional;
 
+import lombok.SneakyThrows;
+import org.metabot.core.bdi.core.Content;
+import org.metabot.core.media.Media;
+import org.metabot.core.media.MediaTranscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import com.github.aiconnection.agents.core.service.RecognitionService;
 
 @Component("voiceRecognition")
-public class VoiceRecognition implements RecognitionService {
+public class VoiceRecognition implements RecognitionService, MediaTranscription<String> {
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
     
@@ -61,5 +66,12 @@ public class VoiceRecognition implements RecognitionService {
         final GroqResponse groqResponse = groqResponseEntity.getBody();
         
         return Optional.ofNullable(groqResponse != null ? groqResponse.getText() : null).orElseThrow();
+    }
+
+    @Override
+    @SneakyThrows
+    public Content<String, String> transcript(Media media) {
+        Resource resource = (Resource) media.getData();
+        return Content.of(this.convertVoiceToText(resource.getContentAsByteArray()));
     }
 }

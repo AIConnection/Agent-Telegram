@@ -5,6 +5,7 @@ import com.github.aiconnection.agents.core.service.AgentService;
 import com.github.aiconnection.agents.core.service.HistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.abilitybots.api.bot.AbilityBot;
@@ -16,17 +17,19 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-@Service
 @Slf4j
+@Service
 public class PlnAgent extends AbilityBot {
 
     private final AgentService agentService;
     private final HistoryService historyService;
 
+    @Autowired
     public PlnAgent(
             @Value("${botToken}") final String botToken,
-            @Autowired final AgentService agentService,
-            @Autowired final HistoryService historyService) {
+            @Qualifier("telegramAgent") final AgentService agentService,
+//            @Qualifier("intelligentAgentService") final AgentService agentService,
+            final HistoryService historyService) {
 
         super(botToken, "PlnAgent");
 

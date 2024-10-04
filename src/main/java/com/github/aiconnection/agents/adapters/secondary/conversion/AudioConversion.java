@@ -1,28 +1,31 @@
 package com.github.aiconnection.agents.adapters.secondary.conversion;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.springframework.stereotype.Component;
-
 import com.github.aiconnection.agents.core.service.ConversionService;
-
 import lombok.SneakyThrows;
+import org.metabot.core.bdi.core.Content;
+import org.metabot.core.media.Media;
+import org.metabot.core.media.MediaTranscription;
+import org.springframework.stereotype.Component;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 
-@Component("audioConversion")
-public class AudioConversion implements ConversionService {
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 
-	@Override
-	@SneakyThrows
+@Component("audioConversion")
+public class AudioConversion implements ConversionService, MediaTranscription<ByteBuffer, String> {
+
+    @Override
+    @SneakyThrows
     public byte[] convert(final URL sourceFile) {
-	
+
         // Define audio attributes for MP3 conversion
-		final AudioAttributes audio = new AudioAttributes();
+        final AudioAttributes audio = new AudioAttributes();
         audio.setCodec("libmp3lame");
         audio.setBitRate(16000);
         audio.setChannels(1);
@@ -39,5 +42,24 @@ public class AudioConversion implements ConversionService {
         encoder.encode(new MultimediaObject(sourceFile), targetMp3File.toFile(), attrs);
 
         return Files.readAllBytes(targetMp3File);
+    }
+
+    @Override
+    public Content<ByteBuffer, String> transcript(Media media) {
+        byte[] converted = this.convert((URL) media.getData());
+
+        return new Content<>() {
+            private ByteBuffer buffer = ByteBuffer.wrap(converted);
+
+            @Override
+            public ByteBuffer getValue() {
+                return buffer;
+            }
+
+            @Override
+            public Map<String, String> getMetadata() {
+                return Map.of();
+            }
+        };
     }
 }

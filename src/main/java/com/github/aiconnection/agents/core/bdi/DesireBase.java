@@ -1,7 +1,11 @@
 package com.github.aiconnection.agents.core.bdi;
 
+import lombok.Getter;
+
+import java.util.Comparator;
 import java.util.List;
 
+@Getter
 public abstract class DesireBase {
 
     private final List<Desire> desires;
@@ -15,7 +19,7 @@ public abstract class DesireBase {
     	
         return desires.stream()
                 .filter(desire -> desire.isApplicable(beliefBase))
-                .sorted((d1, d2) -> Integer.compare(d1.getPriority(), d2.getPriority()))
+                .sorted(Comparator.comparingInt(Desire::getPriority))
                 .toList();
     }
 }

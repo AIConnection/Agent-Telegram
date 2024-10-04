@@ -63,9 +63,9 @@ public class BDIService {
         
         final String analysisResult = analyze(perceptionResult, userInput);
         
-        final String delibarate = deliberate(userInput, analysisResult);
+        final String deliberate = deliberate(userInput, analysisResult);
 
-        return responseFormulate(userInput, delibarate);
+        return responseFormulate(userInput, deliberate);
     }
 
 	private String preprocessStimulus() {
@@ -204,9 +204,9 @@ public class BDIService {
         return compileDeliberationResult(analysisResult, actions, userInput);
     }
     
-    private String responseFormulate(final String userInput, final String delibarate) {
+    private String responseFormulate(final String userInput, final String deliberate) {
     	
-		return textLLMInference.complete(String.format("um agente deliberou [delibarate] sobre os dados de entrada do usuário [userInput], formate de forma adequada para responder ao usuário, responda apenas o que deve ser enviado para o usuário. %suserInput:%s%sdelibarate:%s", "\n", userInput, "\n", delibarate));
+		return textLLMInference.complete(String.format("um agente deliberou [deliberate] sobre os dados de entrada do usuário [userInput], formate de forma adequada para responder ao usuário, responda apenas o que deve ser enviado para o usuário. %suserInput:%s%sdeliberate:%s", "\n", userInput, "\n", deliberate));
 	}
 
     /**

@@ -10,10 +10,10 @@ import lombok.Data;
 @Data
 public class Beliefs {
 
-	private final List<AgentBefief> items;
+	private final List<AgentBelief> items;
 
 	@JsonCreator
-	public Beliefs(@JsonProperty("items") final List<AgentBefief> items) {
+	public Beliefs(@JsonProperty("items") final List<AgentBelief> items) {
 		this.items = items;
 	}
 }

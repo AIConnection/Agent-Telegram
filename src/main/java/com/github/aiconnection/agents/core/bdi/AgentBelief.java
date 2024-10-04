@@ -6,14 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class AgentBefief implements Belief {
+public class AgentBelief implements Belief {
 
 	private String name;
 	
 	private String initialValue;
 
 	@JsonCreator
-	public AgentBefief(@JsonProperty("name") final String name, @JsonProperty("initialValue") final String initialValue) {
+	public AgentBelief(@JsonProperty("name") final String name, @JsonProperty("initialValue") final String initialValue) {
 
 		this.name = name;
 		this.initialValue = initialValue;
