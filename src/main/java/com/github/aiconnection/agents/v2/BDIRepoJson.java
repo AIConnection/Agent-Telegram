@@ -1,4 +1,4 @@
-package com.github.aiconnection.agents.core.v2;
+package com.github.aiconnection.agents.v2;
 
 import com.github.aiconnection.agents.core.bdi.AgentPlan;
 import com.github.aiconnection.agents.core.bdi.BeliefBase;
@@ -6,17 +6,14 @@ import com.github.aiconnection.agents.core.bdi.DesireBase;
 import com.github.aiconnection.agents.core.bdi.Plans;
 import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
 import com.github.aiconnection.agents.core.fsm.FSM;
-import org.metabot.core.bdi.core.Content;
+import com.github.aiconnection.agents.core.service.HistoryService;
 import org.metabot.core.bdi.domain.*;
 import org.metabot.core.bdi.domain.nlp.Task;
 import org.metabot.core.bdi.repo.BDIRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("jsonBDI")
@@ -27,6 +24,7 @@ public class BDIRepoJson implements BDIRepo {
     private final DesireBase desires;
     private final Plans plans;
     private final FSM fsm;
+    private final HistoryService history;
 
     @Autowired
     public BDIRepoJson(
@@ -34,13 +32,15 @@ public class BDIRepoJson implements BDIRepo {
             BeliefBase beliefs,
             DesireBase desires,
             Plans plans,
-            FSM fsm
+            FSM fsm,
+            HistoryService history
     ) {
         this.pln = pln;
         this.beliefs = beliefs;
         this.desires = desires;
         this.plans = plans;
         this.fsm = fsm;
+        this.history = history;
     }
 
     @Override
@@ -65,6 +65,8 @@ public class BDIRepoJson implements BDIRepo {
                 .stream()
                 .collect(Collectors.groupingBy(AgentPlan::getDesireId));
 
+        final List<Intention> intentions = new ArrayList<>();
+
         for (Map.Entry<String, List<AgentPlan>> entry : desirePlans.entrySet()) {
             Optional<Desire> desire = this.getDesires()
                     .stream()
@@ -76,13 +78,19 @@ public class BDIRepoJson implements BDIRepo {
                     .map(p -> new Plan(p.getId(),
                             p.getActions()
                                     .stream()
-                                    .map(act -> new Action<Content<String, String>, Content<String, String>>(act))
-                                    .collect(Collectors.toList())
+                                    .map(Action::new)
+                                    .toList()
                                     .toArray(new Action[0])
                     ))
                     .toList();
+
+            Intention intention = desire
+                    .map(d -> new Intention(UUID.randomUUID().toString(), d, plans.toArray(new Plan[0])))
+                    .orElse(new Intention(UUID.randomUUID().toString(), new Desire(entry.getKey()), plans.toArray(new Plan[0])));
+            intentions.add(intention);
         }
-        return null;
+
+        return intentions;
     }
 
     @Override
@@ -102,7 +110,7 @@ public class BDIRepoJson implements BDIRepo {
                         s.transitions()
                                 .stream()
                                 .map(t -> new Transition(t.trigger(), t.target(), t.condition()))
-                                .collect(Collectors.toList())
+                                .toList()
                                 .toArray(new Transition[0])
                 ))
                 .collect(Collectors.toList());
@@ -115,7 +123,7 @@ public class BDIRepoJson implements BDIRepo {
                 s.transitions()
                         .stream()
                         .map(t -> new Transition(t.trigger(), t.target(), t.condition()))
-                        .collect(Collectors.toList())
+                        .toList()
                         .toArray(new Transition[0])
         ));
     }
@@ -125,5 +133,20 @@ public class BDIRepoJson implements BDIRepo {
         return this.fsm.getStates()
                 .stream()
                 .anyMatch(s -> s.name().equals(id));
+    }
+
+    @Override
+    public Optional<String> getHistory(String id) {
+        return history.getCurrent(Long.valueOf(id));
+    }
+
+    @Override
+    public void addHistory(String id, String content, Object... opts) {
+        history.add(Long.valueOf(id), content, opts);
+    }
+
+    @Override
+    public void cleanHistory(String id) {
+        history.clean(Long.valueOf(id));
     }
 }

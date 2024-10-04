@@ -24,4 +24,10 @@ public interface BDIRepo {
     Optional<State> getState(String id);
 
     boolean hasState(String id);
+
+    void addHistory(final String id, final String history, Object... opts);
+
+    Optional<String> getHistory(final String id);
+
+    void cleanHistory(final String id);
 }

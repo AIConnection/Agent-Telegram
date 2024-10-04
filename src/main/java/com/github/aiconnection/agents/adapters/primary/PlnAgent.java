@@ -1,9 +1,8 @@
 package com.github.aiconnection.agents.adapters.primary;
 
-import com.github.aiconnection.agents.core.MessageType;
-import com.github.aiconnection.agents.core.service.AgentService;
-import com.github.aiconnection.agents.core.service.HistoryService;
+import com.github.aiconnection.agents.v2.TelegramAgent;
 import lombok.extern.slf4j.Slf4j;
+import org.metabot.core.bdi.core.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,8 +11,11 @@ import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.bot.BaseAbilityBot;
 import org.telegram.abilitybots.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Optional;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -21,20 +23,19 @@ import java.util.function.Consumer;
 @Service
 public class PlnAgent extends AbilityBot {
 
-    private final AgentService agentService;
-    private final HistoryService historyService;
+    private final String botToken;
+    private final Agent agentService;
 
     @Autowired
     public PlnAgent(
-            @Value("${botToken}") final String botToken,
-            @Qualifier("telegramAgent") final AgentService agentService,
-//            @Qualifier("intelligentAgentService") final AgentService agentService,
-            final HistoryService historyService) {
+            @Value("${botToken}") String botToken,
+            @Qualifier("telegramAgent") Agent agentService
+//            @Qualifier("intelligentAgentService") final Agent agentService
+    ) {
 
         super(botToken, "PlnAgent");
-
+        this.botToken = botToken;
         this.agentService = agentService;
-        this.historyService = historyService;
     }
 
     public Ability startBot() {
@@ -56,27 +57,57 @@ public class PlnAgent extends AbilityBot {
                 .name(DEFAULT)
                 .locality(Locality.ALL)
                 .privacy(Privacy.PUBLIC)
-                .action(ctx -> {
-                    final String text = ctx.update().getMessage().getText();
-                    final String response = agentService.complete(text);
-
-                    MessageType.responseMessage(ctx.update().getMessage().getChatId(), response, sender);
-                })
+                .action(ctx -> this.actionPerform(ctx.update()))
                 .build();
+    }
+
+    private void actionPerform(Update update) {
+        final String chatId = update.getMessage().getChatId().toString();
+
+        try {
+            final TelegramAgent.MessageType messageType = TelegramAgent.getMessageType(update);
+            switch (messageType) {
+                case TEXT:
+                    processText(update);
+                    break;
+                case VOICE:
+                    processVoice(update);
+                    break;
+                case TEXT_AND_VOICE:
+                    processText(update);
+                    processVoice(update);
+                    break;
+            }
+        } catch (Exception e) {
+            try {
+                log.error("m=processMessage, update: {}", update, e);
+                TelegramAgent.responseMessage(chatId, "Teste novamente mais tarde.", sender);
+            } catch (Exception critical) {
+                log.error("m=processMessage, update: {}", update, critical);
+            }
+        }
     }
 
     @Override
     public long creatorId() {
-
         log.info("m=creatorId");
-
-        return 1L;
+        return UUID.randomUUID().getMostSignificantBits();
     }
 
-    private Consumer<MessageContext> initAction() {
+    private void processText(Update update) throws TelegramApiException {
+        String chatId = update.getMessage().getChatId().toString();
+        String text = update.getMessage().getText();
+        String result = this.agentService.process(text, chatId);
 
-        return messageContext ->
-                log.info("m=inictAction, chatId: {}", messageContext.chatId());
+        TelegramAgent.responseMessage(chatId, result, sender);
+    }
+
+    private void processVoice(Update update) throws TelegramApiException, MalformedURLException {
+        String chatId = update.getMessage().getChatId().toString();
+        URL url = TelegramAgent.toURL(botToken, sender, update.getMessage().getVoice());
+        String result = this.agentService.process(url, chatId);
+
+        TelegramAgent.responseMessage(chatId, result, sender);
     }
 
     public Reply replyToButtons() {
@@ -86,35 +117,20 @@ public class PlnAgent extends AbilityBot {
         return Reply.of(action);
     }
 
+    private Consumer<MessageContext> initAction() {
+
+        return messageContext ->
+                log.info("m=inictAction, chatId: {}", messageContext.chatId());
+    }
+
     private BiConsumer<BaseAbilityBot, Update> action() {
 
         return (ability, update) -> {
 
             log.info("m=action, ability: {}, update: {}", ability, update);
 
-            final MessageType messageType = identifyMessageType(update);
-
-            messageType.processMessage(agentService, historyService, update, sender);
+            this.actionPerform(update);
         };
     }
 
-    private MessageType identifyMessageType(final Update update) {
-        return Optional.ofNullable(update)
-                .filter(u -> update.getMessage() != null)
-                .map((u) -> {
-                    final boolean hasVoice = Optional.ofNullable(u.getMessage().getVoice())
-                            .isPresent();
-                    final boolean hasText = Optional.ofNullable(u.getMessage().getText())
-                            .filter(txt -> !"".equalsIgnoreCase(txt.trim()))
-                            .filter(txt -> !txt.substring(0, 1).equals("/"))
-                            .isPresent();
-                    final boolean hasCommand = Optional.ofNullable(u.getMessage().getText())
-                            .filter(txt -> !"".equalsIgnoreCase(txt.trim()))
-                            .filter(txt -> txt.substring(0, 1).equals("/"))
-                            .isPresent();
-
-                    return MessageType.getMessageType(hasText, hasVoice, hasCommand);
-                })
-                .orElse(MessageType.NONE);
-    }
 }

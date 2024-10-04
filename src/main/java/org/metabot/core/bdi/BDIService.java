@@ -52,6 +52,10 @@ public record BDIService(BDICtx ctx) implements NLPService {
         return Boolean.parseBoolean(this.ctx.getInference().complete(MODERATION, input));
     }
 
+    public String getModerateContent() {
+        return " Parece que sua mensagem não está relacionada com o tipo de serviço que eu ofereço.";
+    }
+
     private String stimulus(String userInput) {
         return this.ctx.getInference().complete(this.ctx.stimulusSummary(), userInput);
     }

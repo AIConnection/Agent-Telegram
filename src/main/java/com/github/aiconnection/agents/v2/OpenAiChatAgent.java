@@ -1,4 +1,4 @@
-package com.github.aiconnection.agents;
+package com.github.aiconnection.agents.v2;
 
 import lombok.extern.slf4j.Slf4j;
 import org.metabot.core.bdi.core.LLMInference;
