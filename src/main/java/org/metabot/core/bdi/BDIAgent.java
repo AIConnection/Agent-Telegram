@@ -85,7 +85,7 @@ public class BDIAgent implements Agent {
     }
 
     private String processText(final String text) {
-        return this.service.ctx().getInference().complete(text);
+        return this.service.process(text);
     }
 
 }

@@ -19,23 +19,23 @@ public class BDICtx {
 
     static final String MODERATION =
             """
-            verifique se a entrada do usuário condiz com o contexto e pode ser respondida.
-            responda apenas:
-            true -> caso sim, está dentro do contexto
-            false -> caso não, a solicitação trata outro assunto e diverge do contexto.
-            """;
+                    verifique se a entrada do usuário condiz com o contexto e pode ser respondida.
+                    responda apenas:
+                    true -> caso sim, está dentro do contexto
+                    false -> caso não, a solicitação trata outro assunto e diverge do contexto.
+                    """;
 
     static final String RESUME =
             """
-            Extraia os principais tópicos e suas palavras chaves (PLN).
-            Por exemplo:
-            -tópico a
-                {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
-            -tópico b
-                {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
-                
-            Responda em formato de lista com os 3 tópicos mais relevantes e suas palavras chaves conforme exemplo.
-            """;
+                    Extraia os principais tópicos e suas palavras chaves (PLN).
+                    Por exemplo:
+                    -tópico a
+                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+                    -tópico b
+                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+                    
+                    Responda em formato de lista com os 3 tópicos mais relevantes e suas palavras chaves conforme exemplo.
+                    """;
 
     private final FSM fsm;
     private final BDIRepo repo;
@@ -89,8 +89,8 @@ public class BDICtx {
     }
 
     Optional<State> next(final String input) {
-        final State state = fsm.perceive(input)
-                .orElse(fsm.init());
+        final Optional<State> opt = fsm.perceive(input);
+        final State state = opt.orElseGet(fsm::init);
 
         return state.getTransitions()
                 .stream()

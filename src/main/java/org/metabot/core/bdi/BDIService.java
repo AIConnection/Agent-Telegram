@@ -61,7 +61,8 @@ public record BDIService(BDICtx ctx) implements NLPService {
     }
 
     private String perceive(final String userInput, final String stimulus) {
-        final State nextState = this.ctx.next(userInput).orElseThrow(() -> new IllegalStateException("Next state not found"));
+        final State nextState = this.ctx.next(userInput)
+                .orElseGet(this.ctx.getFsm()::init);
 
         return this.ctx.getInference()
                 .complete(String.format("até o momento o que foi percebido pelo agente:\npreprocessedStimulus: %s\nfsmPrompt: %s\nnextState: %s",

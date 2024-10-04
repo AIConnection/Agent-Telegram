@@ -14,22 +14,23 @@ import java.util.stream.Collectors;
 @Getter
 public class State extends BDIParent {
 
-    private final boolean initial = false;
     private final List<Transition> transitions;
+    private final boolean initial;
 
     public State(String id, Transition... transitions) {
         this(id, null, false, transitions);
     }
 
     public State(String id, boolean initial, Transition... transitions) {
-        this(id, null, false, transitions);
+        this(id, null, initial, transitions);
     }
 
     public State(String id, String description, boolean initial, Transition... transitions) {
         super(id, Type.STATE, Content.of(description));
+        this.initial = initial;
         this.transitions = Optional.ofNullable(transitions)
                 .map(List::of)
-                .orElse(List.of());
+                .orElseGet(List::of);
     }
 
     @Override

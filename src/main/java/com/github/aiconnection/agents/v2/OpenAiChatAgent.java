@@ -61,7 +61,7 @@ public class OpenAiChatAgent implements LLMInference {
     public String complete(org.metabot.core.message.Message... messages) {
         List<org.metabot.core.message.Message> listMessages = Optional.ofNullable(messages)
                 .map(List::of)
-                .orElse(List.of());
+                .orElseGet(List::of);
         final List<Message> system = listMessages.stream()
                 .filter(message -> message instanceof SystemMessage)
                 .map(org.metabot.core.message.Message::getValue)

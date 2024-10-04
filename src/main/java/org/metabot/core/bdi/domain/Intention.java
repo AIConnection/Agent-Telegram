@@ -24,7 +24,7 @@ public class Intention extends BDIParent {
         this.desire = desire;
         this.plans = Optional.ofNullable(plans)
                 .map(List::of)
-                .orElse(List.of());
+                .orElseGet(List::of);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.github.aiconnection.agents.core.bdi.Plans;
 import com.github.aiconnection.agents.core.bdi.pln.PLNBase;
 import com.github.aiconnection.agents.core.fsm.FSM;
 import com.github.aiconnection.agents.core.service.HistoryService;
+import org.jetbrains.annotations.NotNull;
 import org.metabot.core.bdi.domain.*;
 import org.metabot.core.bdi.domain.nlp.Task;
 import org.metabot.core.bdi.repo.BDIRepo;
@@ -103,36 +104,53 @@ public class BDIRepoJson implements BDIRepo {
 
     @Override
     public Collection<State> getStates() {
-        final String init = this.fsm.getInitialState().name();
-        return this.fsm.getStates()
+        final State init = Optional.of(this.fsm.getInitialState())
+                .map(s -> getState(s, true))
+                .get();
+
+        final List<State> states = new LinkedList<>(List.of(init));
+
+        states.addAll(this.fsm.getStates()
                 .stream()
-                .map(s -> new State(s.name(), s.name().equals(init),
-                        s.transitions()
-                                .stream()
-                                .map(t -> new Transition(t.trigger(), t.target(), t.condition()))
-                                .toList()
-                                .toArray(new Transition[0])
-                ))
-                .collect(Collectors.toList());
+                .map(s -> getState(s, false))
+                .toList());
+
+        return states;
     }
 
-    @Override
-    public Optional<State> getState(String id) {
-        final String init = this.fsm.getInitialState().name();
-        return this.fsm.get(id).map(s -> new State(s.name(), s.name().equals(init),
+    @NotNull
+    private static State getState(com.github.aiconnection.agents.core.fsm.State s, boolean initial) {
+        return new State(s.name(), initial,
                 s.transitions()
                         .stream()
                         .map(t -> new Transition(t.trigger(), t.target(), t.condition()))
                         .toList()
                         .toArray(new Transition[0])
-        ));
+        );
     }
 
     @Override
-    public boolean hasState(String id) {
+    public Optional<State> getState(String id) {
+        final Optional<State> init = Optional.of(this.fsm.getInitialState())
+                .filter(s -> id.contains(s.name()))
+                .map(s -> getState(s, true));
+
+        if (init.isPresent()) {
+            return init;
+        }
+
         return this.fsm.getStates()
                 .stream()
-                .anyMatch(s -> s.name().equals(id));
+                .filter(s -> id.contains(s.name()))
+                .findFirst()
+                .map(s -> getState(s, false));
+    }
+
+    @Override
+    public boolean hasState(String content) {
+        return this.fsm.getStates()
+                .stream()
+                .anyMatch(s -> content.contains(s.name()));
     }
 
     @Override

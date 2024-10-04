@@ -27,7 +27,7 @@ public class Desire extends BDIParent {
         this.priority = priority;
         this.conditions = Optional.ofNullable(conditions)
                 .map(List::of)
-                .orElse(List.of());
+                .orElseGet(List::of);
     }
 
     public Boolean isApplicable(final Belief belief) {

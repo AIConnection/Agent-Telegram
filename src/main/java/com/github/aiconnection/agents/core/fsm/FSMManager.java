@@ -31,7 +31,7 @@ public class FSMManager implements TransitionHandler {
 	public FSMManager(
 			@Qualifier("textLLMInference") final LLMInference llmInference, 
 			final FSM fsm) {
-		
+
 	        this.fsm = fsm;
 	        this.llmInference = llmInference;
 	    }
@@ -50,7 +50,7 @@ public class FSMManager implements TransitionHandler {
 	    	 
 	         log.warn("m=perceptiveState, estado inválido inferido na LLM: {}", currentState);
 	         
-	         return Optional.ofNullable(fsm.getInitialState());
+	         return Optional.of(fsm.getInitialState());
 	     }
 	}
 

@@ -20,7 +20,7 @@ public class Plan extends BDIParent {
         super(id, Type.PLAN, Content.of(description));
         this.actions = Optional.ofNullable(actions)
                 .map(List::of)
-                .orElse(List.of());
+                .orElseGet(List::of);
     }
 
 }
