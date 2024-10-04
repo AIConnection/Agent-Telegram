@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 @Component("audioConversion")
-public class AudioConversion implements ConversionService, MediaTranscription<ByteBuffer, String> {
+public class AudioConversion implements ConversionService, MediaTranscription<ByteBuffer> {
 
     @Override
     @SneakyThrows
