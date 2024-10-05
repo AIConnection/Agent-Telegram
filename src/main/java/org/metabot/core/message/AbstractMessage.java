@@ -36,7 +36,7 @@ public abstract class AbstractMessage implements Message {
      */
     protected final Map<String, Object> metadata;
 
-    protected AbstractMessage(MessageType messageType, String value, Map<String, Object> metadata) {
+    protected AbstractMessage(final MessageType messageType, final String value, final Map<String, Object> metadata) {
         Assert.notNull(messageType, "Message type must not be null");
 
         if (messageType == MessageType.SYSTEM || messageType == MessageType.USER) {
@@ -49,7 +49,7 @@ public abstract class AbstractMessage implements Message {
         this.metadata.put(MESSAGE_TYPE, messageType);
     }
 
-    protected AbstractMessage(MessageType messageType, Resource resource, Map<String, Object> metadata) {
+    protected AbstractMessage(final MessageType messageType, final Resource resource, final Map<String, Object> metadata) {
         Assert.notNull(resource, "Resource must not be null");
         try (InputStream inputStream = resource.getInputStream()) {
             this.value = StreamUtils.copyToString(inputStream, Charset.defaultCharset());

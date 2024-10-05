@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 
 public class Task extends BDIParent {
 
-    public Task(String id, String description) {
+    public Task(final String id, final String description) {
         super(id, Type.NLP_TASK, Content.of(description));
     }
 

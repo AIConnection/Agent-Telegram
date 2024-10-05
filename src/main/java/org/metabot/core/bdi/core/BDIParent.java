@@ -14,11 +14,11 @@ public abstract class BDIParent implements BDI<String> {
 
     private final Type type;
 
-    public BDIParent(String id, Type type) {
+    public BDIParent(final String id, final Type type) {
         this(id, type, null);
     }
 
-    public BDIParent(String id, Type type, Content<String, String> description) {
+    public BDIParent(final String id, final Type type, final Content<String, String> description) {
         Assert.notNull(id, "ID must not be null");
         Assert.notNull(type, "Type must not be null");
         this.id = id;

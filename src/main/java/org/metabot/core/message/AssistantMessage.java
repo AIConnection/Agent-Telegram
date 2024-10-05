@@ -1,5 +1,6 @@
 package org.metabot.core.message;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.util.Assert;
@@ -15,6 +16,7 @@ import java.util.Map;
  */
 @Getter
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class AssistantMessage extends AbstractMessage {
 
     public record ToolCall(String id, String type, String name, String arguments) {
@@ -22,15 +24,15 @@ public class AssistantMessage extends AbstractMessage {
 
     private final List<ToolCall> toolCalls;
 
-    public AssistantMessage(String content) {
+    public AssistantMessage(final String content) {
         this(content, Map.of());
     }
 
-    public AssistantMessage(String content, Map<String, Object> properties) {
+    public AssistantMessage(final String content, final Map<String, Object> properties) {
         this(content, properties, List.of());
     }
 
-    public AssistantMessage(String content, Map<String, Object> properties, List<ToolCall> toolCalls) {
+    public AssistantMessage(final String content, final Map<String, Object> properties, final List<ToolCall> toolCalls) {
         super(MessageType.ASSISTANT, content, properties);
         Assert.notNull(toolCalls, "Tool calls must not be null");
         this.toolCalls = toolCalls;

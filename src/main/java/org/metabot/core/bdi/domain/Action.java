@@ -7,11 +7,11 @@ import org.metabot.core.bdi.core.Content;
 @Getter
 public class Action extends BDIParent {
 
-    public Action(String id) {
+    public Action(final String id) {
         this(id, null);
     }
 
-    public Action(String id, String description) {
+    public Action(final String id, final String description) {
         super(id, Type.ACTION, Content.of(description));
     }
 

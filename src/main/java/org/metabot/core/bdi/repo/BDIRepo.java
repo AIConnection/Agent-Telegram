@@ -21,11 +21,11 @@ public interface BDIRepo {
 
     Collection<State> getStates();
 
-    Optional<State> getState(String id);
+    Optional<State> getState(final String id);
 
-    boolean hasState(String id);
+    boolean hasState(final String id);
 
-    void addHistory(final String id, final String history, Object... opts);
+    void addHistory(final String id, final String history, final Object... opts);
 
     Optional<String> getHistory(final String id);
 

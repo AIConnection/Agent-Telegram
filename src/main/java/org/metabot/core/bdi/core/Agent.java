@@ -9,9 +9,9 @@ public interface Agent {
 
     String process(final String text);
 
-    String process(final URL url, String historyId);
+    String process(final URL url, final String historyId);
 
-    String process(final byte[] bytes, String historyId);
+    String process(final byte[] bytes, final String historyId);
 
-    String process(final String text, String historyId);
+    String process(final String text, final String historyId);
 }

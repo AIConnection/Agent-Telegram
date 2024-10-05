@@ -1,5 +1,6 @@
 package org.metabot.core.bdi.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.metabot.core.bdi.core.BDIParent;
 import org.metabot.core.bdi.core.Content;
@@ -10,19 +11,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public class Desire extends BDIParent {
     private final int priority;
     private final List<String> conditions;
 
-    public Desire(String id, String... conditions) {
+    public Desire(final String id, final String... conditions) {
         this(id, 0, conditions);
     }
 
-    public Desire(String id, int priority, String... conditions) {
+    public Desire(final String id, final int priority, final String... conditions) {
         this(id, null, priority, conditions);
     }
 
-    public Desire(String id, String description, int priority, String... conditions) {
+    public Desire(final String id, final String description, final int priority, final String... conditions) {
         super(id, Type.DESIRE, Content.of(description));
         this.priority = priority;
         this.conditions = Optional.ofNullable(conditions)
@@ -48,7 +50,7 @@ public class Desire extends BDIParent {
 
     private Boolean eval(final String condition, final Belief belief) {
 
-        final String[] expressions = condition.split("[ ]");
+        final String[] expressions = condition.split(" ");
         return process(expressions, belief);
     }
 
@@ -56,8 +58,6 @@ public class Desire extends BDIParent {
 
         return Arrays.asList(expression)
                 .stream()
-                .filter(part -> belief.getId().trim().equalsIgnoreCase(part.trim()))
-                .findFirst()
-                .isPresent();
+                .anyMatch(part -> belief.getId().trim().equalsIgnoreCase(part.trim()));
     }
 }

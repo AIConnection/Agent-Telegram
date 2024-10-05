@@ -17,6 +17,6 @@ public interface MediaTranscription<V> {
      * @param media Resource data to transcript.
      * @return Resume transcript from input data.
      */
-    Content<V, String> transcript(Media media);
+    Content<V, String> transcript(final Media media);
 
 }

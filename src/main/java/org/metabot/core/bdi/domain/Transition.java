@@ -1,5 +1,6 @@
 package org.metabot.core.bdi.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.metabot.core.bdi.core.BDIParent;
 import org.metabot.core.bdi.core.Content;
@@ -9,20 +10,21 @@ import org.springframework.util.Assert;
  * Transition between states.
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public class Transition extends BDIParent {
 
     private final String target;
     private final String condition;
 
-    public Transition(String id, String target) {
+    public Transition(final String id, final String target) {
         this(id, null, target, null);
     }
 
-    public Transition(String id, String target, String condition) {
+    public Transition(final String id, final String target, final String condition) {
         this(id, null, target, condition);
     }
 
-    public Transition(String id, String description, String target, String condition) {
+    public Transition(final String id, final String description, final String target, final String condition) {
         super(id, Type.TRANSITION, Content.of(description));
         Assert.notNull(target, "target must not be null");
         this.target = target;

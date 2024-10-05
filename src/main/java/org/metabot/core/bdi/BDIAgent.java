@@ -40,27 +40,27 @@ public class BDIAgent implements Agent {
         return process(text, null);
     }
 
-    public String process(final URL audio, String historyId) {
-        Media media = new Media(MimeType.valueOf("audio/ogg"), audio);
-        ByteBuffer transcript = audioToMp3.transcript(media).getValue();
+    public String process(final URL audio, final String historyId) {
+    	final Media media = new Media(MimeType.valueOf("audio/ogg"), audio);
+    	final ByteBuffer transcript = audioToMp3.transcript(media).getValue();
 
         return process(transcript.array(), historyId);
     }
 
-    public String process(final byte[] bytes, String historyId) {
-        ByteArrayResource resource = new ByteArrayResource(bytes);
-        Media media = new Media(MimeType.valueOf("audio/mpeg"), resource);
-        String text = mp3ToText.transcript(media).getValue();
+    public String process(final byte[] bytes, final String historyId) {
+    	final ByteArrayResource resource = new ByteArrayResource(bytes);
+    	final Media media = new Media(MimeType.valueOf("audio/mpeg"), resource);
+    	final String text = mp3ToText.transcript(media).getValue();
 
         return this.process(text, historyId);
     }
 
-    public String process(final String userInput, String historyId) {
+    public String process(final String userInput, final String historyId) {
         if (!this.service.moderation(userInput)) {
             return this.service.getModerateContent();
         }
 
-        String history = Optional.ofNullable(historyId)
+        final String history = Optional.ofNullable(historyId)
                 .flatMap(id -> this.service
                         .ctx()
                         .getRepo()
@@ -72,9 +72,9 @@ public class BDIAgent implements Agent {
             return this.processText("userInput:" + userInput);
         }
 
-        String prepare = String.format("resumeCurrentHistory:%s\nuserInput:%s", history, userInput);
-        String result = this.processText(prepare);
-        String resume = this.service.resume(result);
+        final String prepare = String.format("resumeCurrentHistory:%s%suserInput:%s", history, "\n", userInput);
+        final String result = this.processText(prepare);
+        final String resume = this.service.resume(result);
 
         this.service.ctx()
                 .getRepo()

@@ -6,11 +6,11 @@ import org.springframework.util.StringUtils;
 
 public class Belief extends BDIParent {
 
-    public Belief(String id) {
+    public Belief(final String id) {
         this(id, null);
     }
 
-    public Belief(String id, String description) {
+    public Belief(final String id, final String description) {
         super(id, Type.BELIEF, Content.of(description));
     }
 

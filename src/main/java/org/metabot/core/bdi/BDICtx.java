@@ -17,42 +17,22 @@ import java.util.stream.Collectors;
 @Getter
 public class BDICtx {
 
-    static final String MODERATION =
-            """
-                    verifique se a entrada do usuário condiz com o contexto e pode ser respondida.
-                    responda apenas:
-                    true -> caso sim, está dentro do contexto
-                    false -> caso não, a solicitação trata outro assunto e diverge do contexto.
-                    """;
-
-    static final String RESUME =
-            """
-                    Extraia os principais tópicos e suas palavras chaves (PLN).
-                    Por exemplo:
-                    -tópico a
-                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
-                    -tópico b
-                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
-                    
-                    Responda em formato de lista com os 3 tópicos mais relevantes e suas palavras chaves conforme exemplo.
-                    """;
-
     private final FSM fsm;
     private final BDIRepo repo;
     private final LLMInference inference;
 
-    public BDICtx(BDIRepo repo, FSM fsm, LLMInference inference) {
+    public BDICtx(final BDIRepo repo, final FSM fsm, final LLMInference inference) {
         this.repo = repo;
         this.fsm = fsm;
         this.inference = inference;
     }
 
-    public BDICtx(BDIRepo repo, LLMInference inference) {
+    public BDICtx(final BDIRepo repo, final LLMInference inference) {
         this(repo, new BDIFsm(repo, inference), inference);
     }
 
     public String getContext() {
-        return String.format("BeliefSummary: %s\nApplicableDesires:%s", this.beliefSummary(), this.desireSummary());
+        return String.format("BeliefSummary: %s%sApplicableDesires:%s", this.beliefSummary(), "\n", this.desireSummary());
     }
 
     public String beliefSummary() {
@@ -76,8 +56,8 @@ public class BDICtx {
                 .collect(Collectors.joining("\n"));
     }
 
-    Collection<Desire> getDesires() {
-        Collection<Belief> beliefs = this.repo.getBeliefs();
+    protected Collection<Desire> getDesires() {
+        final Collection<Belief> beliefs = this.repo.getBeliefs();
 
         return this.repo.getDesires()
                 .stream()
@@ -88,7 +68,7 @@ public class BDICtx {
                 .toList();
     }
 
-    Optional<State> next(final String input) {
+    protected Optional<State> next(final String input) {
         final Optional<State> opt = fsm.perceive(input);
         final State state = opt.orElseGet(fsm::init);
 

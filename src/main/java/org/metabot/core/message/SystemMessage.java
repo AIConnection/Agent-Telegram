@@ -17,11 +17,11 @@ import java.util.Map;
 @ToString
 public class SystemMessage extends AbstractMessage {
 
-    public SystemMessage(String textContent) {
+    public SystemMessage(final String textContent) {
         super(MessageType.SYSTEM, textContent, Map.of());
     }
 
-    public SystemMessage(Resource resource) {
+    public SystemMessage(final Resource resource) {
         super(MessageType.SYSTEM, resource, Map.of());
     }
 

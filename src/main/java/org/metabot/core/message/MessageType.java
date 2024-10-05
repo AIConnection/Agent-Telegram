@@ -1,5 +1,7 @@
 package org.metabot.core.message;
 
+import java.util.Arrays;
+
 /**
  * The MessageType enum represents the type of message in an ia application.
  */
@@ -36,7 +38,7 @@ public enum MessageType {
 
     private final String value;
 
-    MessageType(String value) {
+    private MessageType(String value) {
         this.value = value;
     }
 
@@ -44,13 +46,12 @@ public enum MessageType {
         return value;
     }
 
-    public static MessageType fromValue(String value) {
-        for (MessageType messageType : MessageType.values()) {
-            if (messageType.getValue().equals(value)) {
-                return messageType;
-            }
-        }
-        throw new IllegalArgumentException("Invalid MessageType value: " + value);
+    public static MessageType fromValue(final String value) {
+    	return Arrays.asList(MessageType.values())
+    			.stream()
+    			.filter(messageType->messageType.name().equalsIgnoreCase(value))
+    			.findFirst()
+    			.orElseThrow(()->new IllegalArgumentException("Invalid MessageType value: " + value));
     }
 
 }

@@ -26,7 +26,7 @@ public class BDIFsm implements FSM {
     private final BDIRepo repo;
     private final LLMInference inference;
 
-    public BDIFsm(BDIRepo repo, LLMInference inference) {
+    public BDIFsm(final BDIRepo repo, final LLMInference inference) {
         super();
         this.repo = repo;
         this.inference = inference;

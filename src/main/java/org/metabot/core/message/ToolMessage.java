@@ -1,5 +1,6 @@
 package org.metabot.core.message;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ import java.util.Map;
  */
 @Getter
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class ToolMessage extends AbstractMessage {
 
     public record Tool(String id, String name, String responseData) {
@@ -18,12 +20,12 @@ public class ToolMessage extends AbstractMessage {
 
     protected final List<Tool> responses;
 
-    public ToolMessage(List<Tool> responses, Map<String, Object> metadata) {
+    public ToolMessage(final List<Tool> responses, final Map<String, Object> metadata) {
         super(MessageType.TOOL, "", metadata);
         this.responses = responses;
     }
 
-    public ToolMessage(List<Tool> responses) {
+    public ToolMessage(final List<Tool> responses) {
         this(responses, Map.of());
     }
 

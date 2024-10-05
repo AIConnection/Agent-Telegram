@@ -17,20 +17,20 @@ import java.net.URL;
 @EqualsAndHashCode
 public class Media {
 
-    private MimeType type;
-    private Object data;
+    private final MimeType type;
+    private final Object data;
 
-    private Media(MimeType type, Object data) {
+    private Media(final MimeType type, final Object data) {
         super();
         this.type = type;
         this.data = data;
     }
 
-    public Media(MimeType type, URL data) {
+    public Media(final MimeType type, final URL data) {
         this(type, (Object) data);
     }
 
-    public Media(MimeType type, Resource data) {
+    public Media(final MimeType type, final Resource data) {
         this(type, (Object) data);
     }
 

@@ -8,10 +8,32 @@ import org.metabot.core.bdi.domain.State;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.metabot.core.bdi.BDICtx.MODERATION;
-import static org.metabot.core.bdi.BDICtx.RESUME;
-
 public record BDIService(BDICtx ctx) implements NLPService {
+	
+    private static final String MODERATE_CONTENT = 
+            """
+                    Parece que sua mensagem não está relacionada com o tipo de serviço que eu ofereço.
+            """;
+
+	private static final String MODERATION =
+            """
+                    verifique se a entrada do usuário condiz com o contexto e pode ser respondida.
+                    responda apenas:
+                    true -> caso sim, está dentro do contexto
+                    false -> caso não, a solicitação trata outro assunto e diverge do contexto.
+                    """;
+
+    private static final String RESUME =
+            """
+                    Extraia os principais tópicos e suas palavras chaves (PLN).
+                    Por exemplo:
+                    -tópico a
+                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+                    -tópico b
+                        {entidades nomeadas}, {relacionamento das entidades}, {analise de sentimento}, {verbos}, {substantivos}, {objetos}, {datas}, {locais}, {pessoas}, {eventos}, {crenças}, {desejos}, {intenções}, {perguntas}, {respostas}
+                    
+                    Responda em formato de lista com os 3 tópicos mais relevantes e suas palavras chaves conforme exemplo.
+                    """;
 
     /**
      * Process user input into flow stimulus, perception, analyze and deliberate of the BDI.
@@ -48,12 +70,12 @@ public record BDIService(BDICtx ctx) implements NLPService {
      */
     @Override
     public boolean moderation(final String userInput) {
-        final String input = String.format("Context:%s\nuserInput:%s", this.ctx.getContext(), userInput);
+        final String input = String.format("Context:%s%suserInput:%s", this.ctx.getContext(), "\n", userInput);
         return Boolean.parseBoolean(this.ctx.getInference().complete(MODERATION, input));
     }
 
     public String getModerateContent() {
-        return " Parece que sua mensagem não está relacionada com o tipo de serviço que eu ofereço.";
+        return MODERATE_CONTENT;
     }
 
     private String stimulus(String userInput) {
@@ -65,8 +87,8 @@ public record BDIService(BDICtx ctx) implements NLPService {
                 .orElseGet(this.ctx.getFsm()::init);
 
         return this.ctx.getInference()
-                .complete(String.format("até o momento o que foi percebido pelo agente:\npreprocessedStimulus: %s\nfsmPrompt: %s\nnextState: %s",
-                        stimulus, nextState.toString(), nextState.getId()), userInput);
+                .complete(String.format("até o momento o que foi percebido pelo agente:%spreprocessedStimulus: %s%sfsmPrompt: %s%snextState: %s",
+                        "\n", stimulus, "\n", nextState.toString(), "\n", nextState.getId()), userInput);
     }
 
     private String analyze(final String userInput, final String perception) {
